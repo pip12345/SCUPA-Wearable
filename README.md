@@ -37,13 +37,6 @@
 Wearable device code for project SCUPA 2023.
 Runs on ESP32 with platformIO.
 
-  
-<!-- LICENSE -->
-## License
-
-Distributed under the MIT License. See `LICENSE.txt` for more information.
-
-
 <!-- Dependencies -->
 ## Dependencies
 
