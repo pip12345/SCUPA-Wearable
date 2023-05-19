@@ -18,8 +18,7 @@ void DrawController::clearAll() {
     tft.fillScreen(BACKGROUND_COLOR);
 }
 
-void DrawController::resetTextToDefault()
-{
+void DrawController::resetTextToDefault() {
     tft.setTextSize(1);
     tft.setTextColor(ST77XX_WHITE);
     tft.setTextWrap(true);
