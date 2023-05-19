@@ -37,11 +37,11 @@ Therefore, all calls to tft must be done in the source file of this header
 
 static Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 
-// Main controller for drawing
 class DrawController {
   public:
     DrawController();
     void clearAll();
+    void resetTextToDefault();
 };
 
 class DrawMap {
@@ -66,4 +66,19 @@ class DrawMap {
 
     const char RANGE_CIRCLE_RAD_CLOSE = 50; // char if value is less than 127
     const char RANGE_CIRCLE_RAD_MEDIUM = 100;
+};
+
+class DrawMenu {
+  public:
+    DrawMenu();
+
+    void showMenu();
+    void upMenu();
+    void downMenu();
+
+    int selected_item;
+
+  private:
+    const int MENU_SPACING = 35; // spacing between each item in the menu
+    const int MAX_ITEMS = 6;     // 6 items in menu
 };
