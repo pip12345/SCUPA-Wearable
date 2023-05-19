@@ -13,7 +13,7 @@ DrawMap gps_map;
 DrawMenu menu;
 
 Button2 btn_up, btn_down, btn_left, btn_right;
-bool btn_up_pressed{}, btn_down_pressed{}, btn_left_pressed{}, btn_right_pressed{};
+bool btn_up_pressed{}, btn_down_pressed{}, btn_left_pressed{}, btn_right_pressed{}, btn_right_long_pressed{};
 
 enum State { main_menu,
              map_display,
@@ -41,6 +41,11 @@ void btn_pressed(Button2 &btn) {
     }
 }
 
+void btn_longclick(Button2 &btn) {
+    btn_right_long_pressed = true;
+    Serial.println("right longclick");
+}
+
 void setup() {
     Serial.begin(9600);
 
@@ -51,7 +56,8 @@ void setup() {
     btn_left.begin(LEFT_PIN);
     btn_left.setPressedHandler(btn_pressed);
     btn_right.begin(RIGHT_PIN);
-    btn_right.setPressedHandler(btn_pressed);
+    btn_right.setClickHandler(btn_pressed);
+    btn_right.setLongClickHandler(btn_longclick);
 
     /////// DEBUG //////////
     // Distance between userlocation and seahorses is 139.85 m
@@ -144,4 +150,5 @@ void loop() {
     btn_down_pressed = false;
     btn_left_pressed = false;
     btn_right_pressed = false;
+    btn_right_long_pressed = false;
 }
