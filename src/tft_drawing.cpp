@@ -7,6 +7,7 @@ DrawController::DrawController() {
     tft.setSPISpeed(40000000);        // DANGER MIGHT BREAK STUFF
     tft.setRotation(1);               // Set screen in landscape mode
     tft.fillScreen(BACKGROUND_COLOR); // Wipe whole screen
+    tft.setTextSize(1);
     tft.setTextColor(ST77XX_WHITE);
     tft.setTextWrap(true);
     Serial.print("Draw Controller Initialized");
@@ -17,6 +18,13 @@ void DrawController::clearAll() {
     tft.fillScreen(BACKGROUND_COLOR);
 }
 
+void DrawController::resetTextToDefault() {
+    tft.setTextSize(1);
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setTextWrap(true);
+}
+
+// constructor
 DrawMap::DrawMap() {
     pixels_per_meter = 0.4;
 }
@@ -24,6 +32,7 @@ DrawMap::DrawMap() {
 // Update and redraw the map with the given storage data
 void DrawMap::updateMap() {
     tft.fillScreen(BACKGROUND_COLOR); // clear screen
+    tft.setTextSize(1);
 
     updateRingsRadiusText(RANGE_CIRCLE_RAD_CLOSE / pixels_per_meter, RANGE_CIRCLE_RAD_MEDIUM / pixels_per_meter);
     drawCoordinates();
@@ -43,7 +52,9 @@ void DrawMap::loopMap() {
     }
 }
 
+// Draw text in corners of screens
 void DrawMap::drawText() {
+    tft.setTextSize(1);
     tft.setTextColor(ST77XX_WHITE);
     tft.setTextWrap(true);
 
@@ -86,6 +97,7 @@ void DrawMap::updateRingsRadiusText(int range_close, int range_medium) {
     intToCharArray(range_close, range_close_chars);
     intToCharArray(range_medium, range_medium_chars);
 
+    tft.setTextSize(1);
     tft.setTextColor(ST77XX_WHITE);
     tft.setTextWrap(true);
 
@@ -126,6 +138,7 @@ void DrawMap::updateCompass(float angle) {
     // Draw compass pointer
     tft.drawLine(TFT_CENTER_X, TFT_CENTER_Y, TFT_CENTER_X + x_offset, TFT_CENTER_Y + y_offset, ST77XX_RED);
 
+    tft.setTextSize(1);
     tft.setTextColor(ST77XX_WHITE);
     tft.setTextWrap(true);
 
@@ -154,10 +167,11 @@ void DrawMap::updateCourseTo(int storage_id) {
         tft.drawLine(TFT_CENTER_X, TFT_CENTER_Y, screen_coords.x, screen_coords.y, ST77XX_CYAN);
 
         // Draw colored dot over the selected one
-        tft.fillCircle(screen_coords.x, screen_coords.y, LOCATION_DOT_SIZE+1, ST77XX_MAGENTA);
+        tft.fillCircle(screen_coords.x, screen_coords.y, LOCATION_DOT_SIZE + 1, ST77XX_MAGENTA);
 
         // Print depth info underneath selected dot
         tft.setTextWrap(true);
+        tft.setTextSize(1);
         tft.setTextColor(ST77XX_BLUE);
         tft.setCursor(screen_coords.x - 15, screen_coords.y + 5);
 
@@ -192,6 +206,7 @@ void DrawMap::drawCoordinates() {
                             tft.fillCircle(screen_coords.x, screen_coords.y, LOCATION_DOT_SIZE, ST77XX_GREEN);
 
                             // Print id above dot
+                            tft.setTextSize(1);
                             tft.setTextWrap(true);
                             tft.setTextColor(ST77XX_GREEN);
 
@@ -208,11 +223,54 @@ void DrawMap::drawCoordinates() {
                             char depth_text[6] = {};
                             dtostrf(storage.returnBookmark(i).depth, 5, 2, depth_text);
                             tft.println(depth_text);
-
                         }
                     }
                 } // if the screen coordinates exist
             }
         }
+    }
+}
+
+DrawMenu::DrawMenu() {
+    selected_item = 0;
+}
+
+// Draw menu elements, needs to be called once before loopMenu()
+void DrawMenu::showMenu() {
+    tft.fillScreen(BACKGROUND_COLOR); // Clear screen
+
+    // Draw block for currently selected menu item
+    tft.fillRoundRect(5, 18 - 5 + (MENU_SPACING * selected_item), 280, 16 + (5 * 2), 5, ST77XX_BLUE);
+
+    // Draw Text
+    tft.setTextWrap(true);
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setCursor(0, 20);
+    tft.setTextSize(2); // 12*16
+    tft.println(" Map");
+    tft.setCursor(0, 20 + MENU_SPACING);
+    tft.println(" List Bookmarks");
+    tft.setCursor(0, 20 + MENU_SPACING * 2);
+    tft.println(" Save Bookmark");
+    tft.setCursor(0, 20 + MENU_SPACING * 3);
+    tft.println(" Check Messages");
+    tft.setCursor(0, 20 + MENU_SPACING * 4);
+    tft.println(" Send Message");
+    tft.setCursor(0, 20 + MENU_SPACING * 5);
+    tft.println(" Send Emergency Message");
+    tft.setTextSize(1);
+}
+
+void DrawMenu::upMenu() {
+    if (selected_item > 0 && selected_item < MAX_ITEMS) {
+        selected_item -= 1;
+        showMenu();
+    }
+}
+
+void DrawMenu::downMenu() {
+    if (selected_item >= 0 && selected_item < (MAX_ITEMS - 1)) {
+        selected_item += 1;
+        showMenu();
     }
 }

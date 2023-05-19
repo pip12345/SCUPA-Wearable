@@ -10,15 +10,20 @@
 
 DrawController screen;
 DrawMap gps_map;
+DrawMenu menu;
+
 Button2 btn_up, btn_down, btn_left, btn_right;
 bool btn_up_pressed{}, btn_down_pressed{}, btn_left_pressed{}, btn_right_pressed{};
 
-enum State { map_display,
-             main_menu,
-             messages,
-             bookmarks };
+enum State { main_menu,
+             map_display,
+             list_bookmarks,
+             save_bookmark,
+             check_messages,
+             send_message,
+             send_emergency };
 
-State current_state = map_display;
+int current_state = map_display;
 
 void btn_pressed(Button2 &btn) {
     if (btn == btn_up) {
@@ -67,30 +72,67 @@ void loop() {
     btn_right.loop();
 
     switch (current_state) {
+    case main_menu:
+        if (btn_up_pressed) {
+            menu.upMenu();
+            Serial.println(menu.selected_item);
+        }
+
+        if (btn_down_pressed) {
+            menu.downMenu();
+            Serial.println(menu.selected_item);
+        }
+
+        if (btn_right_pressed) {
+            // Convert selected_item to current_state
+            current_state = menu.selected_item + 1;
+        }
+        break;
     case map_display:
         gps_map.loopMap();
 
         if (btn_up_pressed) {
-          gps_map.pixels_per_meter *= 1.2;
-          gps_map.updateMap(); // Instantly update map
+            gps_map.pixels_per_meter *= 1.2;
+            gps_map.updateMap(); // Instantly update map
         }
 
         if (btn_down_pressed) {
-          gps_map.pixels_per_meter /= 1.2;
-          gps_map.updateMap();
+            gps_map.pixels_per_meter /= 1.2;
+            gps_map.updateMap();
+        }
+
+        if (btn_left_pressed) {
+            current_state = main_menu;
+            menu.showMenu();
         }
 
         break;
-    case main_menu:
-        // code here n shit
+
+    case list_bookmarks:
+        // code here
+        Serial.println("list bookmarks selected");
+        current_state = main_menu;
         break;
 
-    case messages:
-        // code here n shit
+    case save_bookmark:
+        // code here
+        Serial.println("save bookmark selected");
+        current_state = main_menu;
         break;
-
-    case bookmarks:
-        // code here n shit
+    case check_messages:
+        // code here
+        Serial.println("check messages selected");
+        current_state = main_menu;
+        break;
+    case send_message:
+        // code here
+        Serial.println("send message selected");
+        current_state = main_menu;
+        break;
+    case send_emergency:
+        // code here
+        Serial.println("emergency message selected");
+        current_state = main_menu;
         break;
 
     default:
