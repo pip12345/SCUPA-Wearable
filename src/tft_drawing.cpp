@@ -33,8 +33,10 @@ DrawMap::DrawMap() {
 
 // Update and redraw the map with the given storage data
 void DrawMap::updateMap() {
-    tft.fillScreen(BACKGROUND_COLOR); // clear screen
+    // Set text parameters to defaults
+    tft.fillScreen(BACKGROUND_COLOR);
     tft.setTextSize(1);
+    tft.setTextWrap(true);
 
     updateRingsRadiusText(RANGE_CIRCLE_RAD_CLOSE / pixels_per_meter, RANGE_CIRCLE_RAD_MEDIUM / pixels_per_meter);
     drawCoordinates();
@@ -62,44 +64,27 @@ void DrawMap::drawText() {
     tft.setTextWrap(true);
 
     // Draw GPS text
-    char gps_text_lat[12] = {};
-    char gps_text_long[12] = {};
-    dtostrf(storage.returnUser().latitude, 9, 6, gps_text_lat);
-    dtostrf(storage.returnUser().longitude, 9, 6, gps_text_long);
-
     tft.setCursor(0, 0);
     tft.print("GPS: ");
-    tft.print(gps_text_lat);
+    tft.print(storage.returnUser().latitude, 6);
     tft.print(", ");
-    tft.print(gps_text_long);
+    tft.print(storage.returnUser().longitude, 6);
 
     // Draw current pixel scale
-    char scale_text[6] = {};
-    dtostrf((float)(1 / pixels_per_meter), 5, 2, scale_text);
-
     tft.setCursor(TFT_X - 110, 0);
     tft.print("Scale: ");
-    tft.print(scale_text);
+    tft.print((float)(1 / pixels_per_meter));
     tft.print(" m/px");
-
-    char depth_text[6] = {};
-    dtostrf(storage.returnUser().depth, 5, 2, depth_text);
 
     tft.setCursor(0, TFT_Y - 10);
     tft.print("Depth: ");
-    tft.print(depth_text);
+    tft.print(storage.returnUser().depth);
     tft.print(" m");
 }
 
 // Redraw radius rings and update text of radius rings
 void DrawMap::updateRingsRadiusText(int range_close, int range_medium) {
     // Convert range ints to const char arrays
-    char range_close_chars[5];
-    char range_medium_chars[5];
-
-    intToCharArray(range_close, range_close_chars);
-    intToCharArray(range_medium, range_medium_chars);
-
     tft.setTextSize(1);
     tft.setTextColor(ST77XX_WHITE);
     tft.setTextWrap(true);
@@ -110,11 +95,11 @@ void DrawMap::updateRingsRadiusText(int range_close, int range_medium) {
 
     // Draw meters radius text above range rings
     tft.setCursor(TFT_CENTER_X - 10, TFT_CENTER_Y + RANGE_CIRCLE_RAD_CLOSE + 8);
-    tft.print(range_close_chars);
+    tft.print(range_close);
     tft.print(" M");
 
     tft.setCursor(TFT_CENTER_X - 10, TFT_CENTER_Y + RANGE_CIRCLE_RAD_MEDIUM + 8);
-    tft.print(range_medium_chars);
+    tft.print(range_medium);
     tft.print(" M");
 }
 
@@ -187,15 +172,12 @@ void DrawMap::updateCourseTo(int storage_id) {
         tft.setCursor(screen_coords.x - 15, screen_coords.y + 5);
 
         char depth_text[6] = {};
-        dtostrf(storage.returnBookmark(storage_id).depth, 5, 2, depth_text);
-        tft.println(depth_text);
+        tft.println(storage.returnBookmark(storage_id).depth);
 
         // Print distance info underneath selected dot
         tft.setTextColor(ST77XX_ORANGE);
         tft.setCursor(screen_coords.x - 15, screen_coords.y + 15);
-        char distance_text[7] = {};
-        dtostrf(distGPStoUser(storage, storage_id), 6, 2, distance_text);
-        tft.println(distance_text);
+        tft.println(distGPStoUser(storage, storage_id));
     }
 }
 
@@ -218,22 +200,17 @@ void DrawMap::drawCoordinates() {
 
                             // Print id above dot
                             tft.setTextSize(1);
-                            tft.setTextWrap(true);
                             tft.setTextColor(ST77XX_GREEN);
 
-                            char id_text[3] = {};
-                            dtostrf(i, 2, 0, id_text);
-                            tft.setCursor(screen_coords.x, screen_coords.y - 5);
-                            tft.println(id_text);
+                            tft.setCursor(screen_coords.x + 5, screen_coords.y - 10);
+                            tft.println(i);
 
-                            // Print depth info underneath selected dot
-                            tft.setTextWrap(true);
-                            tft.setTextColor(ST77XX_BLUE);
-                            tft.setCursor(screen_coords.x - 15, screen_coords.y + 5);
-
-                            char depth_text[6] = {};
-                            dtostrf(storage.returnBookmark(i).depth, 5, 2, depth_text);
-                            tft.println(depth_text);
+                            // Print depth info underneath selected dot if depth is set
+                            if (storage.returnBookmark(i).depth != -1) {
+                                tft.setTextColor(ST77XX_BLUE);
+                                tft.setCursor(screen_coords.x - 15, screen_coords.y + 5);
+                                tft.println(storage.returnBookmark(i).depth);
+                            }
                         }
                     }
                 } // if the screen coordinates exist
