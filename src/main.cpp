@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 
+// Button pins
 #define UP_PIN 33
 #define DOWN_PIN 25
 #define LEFT_PIN 26
@@ -110,6 +111,15 @@ void loop() {
         if (btn_left_pressed) {
             current_state = main_menu;
             menu.showMenu();
+        }
+
+        if (btn_right_pressed) {
+            if (gps_map.course_id != 4) {
+                gps_map.course_id = 4;
+            } else {
+                gps_map.course_id = 0;
+            }
+            
         }
 
         break;

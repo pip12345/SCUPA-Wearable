@@ -47,14 +47,17 @@ class DrawController {
 class DrawMap {
   public:
     DrawMap();
+    void updateMap(); // Update and redraw the map with the given storage data
+    void loopMap();   // runs updateMap() every set UPDATE_INTERVAL milliseconds
+
+    GpsStorage storage{}; // stores GPS coordinates that get drawn on the screen
 
     float pixels_per_meter; // Pixels per meter scale for scaling the map, used for calculating on-screen distances
-    void updateMap();       // Update and redraw the map with the given storage data
-    void loopMap();         // runs updateMap() every set UPDATE_INTERVAL milliseconds
-    GpsStorage storage;     // stores GPS coordinates that get drawn on the screen
+    float compass_angle{};
+    int course_id{};
 
-    int current_time; // Used for time-based actions
-    int previous_time;
+    int current_time{}; // Used for time-based actions
+    int previous_time{};
     const int UPDATE_INTERVAL = 2000; // update interval in ms
 
   private:

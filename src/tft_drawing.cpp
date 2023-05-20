@@ -27,6 +27,8 @@ void DrawController::resetTextToDefault() {
 // constructor
 DrawMap::DrawMap() {
     pixels_per_meter = 0.4;
+    course_id = 0;
+    compass_angle = 90;
 }
 
 // Update and redraw the map with the given storage data
@@ -39,8 +41,9 @@ void DrawMap::updateMap() {
     drawText();
 
     // TO DO: ADD FUNCTION HERE THAT GETS THE LATEST COMPASS ANGLE FROM MAGNETOMETER
-    updateCourseTo(4); // set course
-    updateCompass(90); // Update compass
+    // TO DO: ADD FUNCTION THAT SETS THE COURSE
+    updateCourseTo(course_id);    // set course
+    updateCompass(compass_angle); // Update compass
 }
 
 // Update and redraw map after a time of UPDATE_INTERVAL has passed
@@ -169,9 +172,17 @@ void DrawMap::updateCourseTo(int storage_id) {
         // Draw colored dot over the selected one
         tft.fillCircle(screen_coords.x, screen_coords.y, LOCATION_DOT_SIZE + 1, ST77XX_MAGENTA);
 
-        // Print depth info underneath selected dot
+        // Print course set to text
         tft.setTextWrap(true);
         tft.setTextSize(1);
+        tft.setTextColor(ST77XX_ORANGE);
+        tft.setCursor(0, 10);
+        tft.print("Course to: ");
+        tft.println(course_id);
+        tft.print("Distance: ");
+        tft.print(distGPStoUser(storage, course_id));
+
+        // Print depth info underneath selected dot
         tft.setTextColor(ST77XX_BLUE);
         tft.setCursor(screen_coords.x - 15, screen_coords.y + 5);
 
@@ -261,6 +272,7 @@ void DrawMenu::showMenu() {
     tft.setTextSize(1);
 }
 
+// Scroll one item up in the menu
 void DrawMenu::upMenu() {
     if (selected_item > 0 && selected_item < MAX_ITEMS) {
         selected_item -= 1;
@@ -268,6 +280,7 @@ void DrawMenu::upMenu() {
     }
 }
 
+// Scroll one item down in the menu
 void DrawMenu::downMenu() {
     if (selected_item >= 0 && selected_item < (MAX_ITEMS - 1)) {
         selected_item += 1;
