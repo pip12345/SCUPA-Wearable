@@ -12,6 +12,8 @@
 DrawController screen;
 DrawMap gps_map;
 DrawMenu menu;
+DrawBookmarks bookmarks;
+GpsStorage gps_storage; // stores GPS coordinates that get drawn on the screen
 
 Button2 btn_up, btn_down, btn_left, btn_right;
 bool btn_up_pressed{}, btn_down_pressed{}, btn_left_pressed{}, btn_right_pressed{}, btn_right_long_pressed{};
@@ -62,12 +64,16 @@ void setup() {
 
     /////// DEBUG //////////
     // Distance between userlocation and seahorses is 139.85 m
-    gps_map.storage.setUser(12.195722, -69.046859, 10);
-    gps_map.storage.addBookmark(12.194572, -69.047380, 12, "Sea horses", 1);
-    gps_map.storage.addBookmark(12.195009, -69.046143, 31, "Shipwreck", 2);
-    gps_map.storage.addBookmark(12.197472, -69.047321, 0, "Cool boat", 3);
-    gps_map.storage.addBookmark(12.196264, -69.051067, 0, "Beach", 4);
+    gps_storage.setUser(12.195722, -69.046859, 10);
+    gps_storage.addBookmark(12.194572, -69.047380, 12, "Sea horses", 1);
+    gps_storage.addBookmark(12.195009, -69.046143, 31, "Shipwreck", 2);
+    gps_storage.addBookmark(12.197472, -69.047321, 0, "Cool boat", 3);
+    gps_storage.addBookmark(12.196264, -69.051067, 0, "Beach", 4);
     /////// DEBUG //////////
+
+    for (int i = 0; i < 5; i++) {
+        Serial.println(gps_storage.returnBookmark(i).description);
+    }
 
     Serial.println("Setup finished");
 }
@@ -80,6 +86,8 @@ void loop() {
 
     switch (current_state) {
     case main_menu:
+        menu.loopMenu();
+
         if (btn_up_pressed) {
             menu.upMenu();
             Serial.println(menu.selected_item);
@@ -109,8 +117,8 @@ void loop() {
         }
 
         if (btn_left_pressed) {
+            // return to main menu
             current_state = main_menu;
-            menu.showMenu();
         }
 
         if (btn_right_pressed) {
@@ -119,15 +127,28 @@ void loop() {
             } else {
                 gps_map.course_id = 0;
             }
-            
         }
 
         break;
 
     case list_bookmarks:
-        // code here
-        Serial.println("list bookmarks selected");
-        current_state = main_menu;
+        // item loop
+        bookmarks.loopBookmarks();
+
+        if (btn_up_pressed) {
+        }
+
+        if (btn_down_pressed) {
+        }
+
+        if (btn_left_pressed) {
+            // return to main menu
+            current_state = main_menu;
+        }
+
+        if (btn_right_pressed) {
+        }
+
         break;
 
     case save_bookmark:

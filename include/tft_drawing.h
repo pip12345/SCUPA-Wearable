@@ -47,18 +47,12 @@ class DrawController {
 class DrawMap {
   public:
     DrawMap();
-    void updateMap(); // Update and redraw the map with the given storage data
     void loopMap();   // runs updateMap() every set UPDATE_INTERVAL milliseconds
-
-    GpsStorage storage{}; // stores GPS coordinates that get drawn on the screen
+    void updateMap(); // Update and redraw the map with the given storage data
 
     float pixels_per_meter; // Pixels per meter scale for scaling the map, used for calculating on-screen distances
     float compass_angle{};
     int course_id{};
-
-    int current_time{}; // Used for time-based actions
-    int previous_time{};
-    const int UPDATE_INTERVAL = 2000; // update interval in ms
 
   private:
     void drawText();
@@ -69,19 +63,48 @@ class DrawMap {
 
     const char RANGE_CIRCLE_RAD_CLOSE = 50; // char if value is less than 127
     const char RANGE_CIRCLE_RAD_MEDIUM = 100;
+
+    int current_time{}; // Used for time-based actions
+    int previous_time{};
+    const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
 };
 
 class DrawMenu {
   public:
     DrawMenu();
 
-    void showMenu();
+    void loopMenu(); // runs updateMenu() every set UPDATE_INTERVAL millsieconds
+    void updateMenu();
     void upMenu();
     void downMenu();
 
-    int selected_item;
+    int selected_item{};
 
   private:
-    const int MENU_SPACING = 35; // spacing between each item in the menu
-    const int MAX_ITEMS = 6;     // 6 items in menu
+    const int MENU_SPACING = 35;  // spacing between each item in the menu
+    const int MAX_MENU_ITEMS = 6; // 6 items in menu
+
+    int current_time{}; // Used for time-based actions
+    int previous_time{};
+    const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
+};
+
+class DrawBookmarks {
+  public:
+    DrawBookmarks();
+
+    void loopBookmarks();
+    void updateBookmarks();
+    void upMenu();
+    void downMenu();
+
+    int selected_item{};
+
+  private:
+    const int MENU_SPACING = 18;
+    const int MAX_MENU_ITEMS = 6; // show x items as once
+
+    int current_time{}; // Used for time-based actions
+    int previous_time{};
+    const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
 };

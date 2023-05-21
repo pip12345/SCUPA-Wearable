@@ -1,5 +1,7 @@
 #include "tft_drawing.h"
 
+extern GpsStorage gps_storage; // Requires gps_storage to be declared elsewhere
+
 // Inits tft in this cpp file on creation of the drawcontroller, use this for all global stuff
 // tft commands such as tft.drawPixel ONLY WORK inside this .cpp file
 DrawController::DrawController() {
@@ -51,7 +53,7 @@ void DrawMap::updateMap() {
 // Update and redraw map after a time of UPDATE_INTERVAL has passed
 void DrawMap::loopMap() {
     current_time = millis();
-    if (current_time - previous_time >= UPDATE_INTERVAL) {
+    if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
         previous_time = current_time;
         updateMap();
     }
@@ -66,9 +68,9 @@ void DrawMap::drawText() {
     // Draw GPS text
     tft.setCursor(0, 0);
     tft.print("GPS: ");
-    tft.print(storage.returnUser().latitude, 6);
+    tft.print(gps_storage.returnUser().latitude, 6);
     tft.print(", ");
-    tft.print(storage.returnUser().longitude, 6);
+    tft.print(gps_storage.returnUser().longitude, 6);
 
     // Draw current pixel scale
     tft.setCursor(TFT_X - 110, 0);
@@ -78,7 +80,7 @@ void DrawMap::drawText() {
 
     tft.setCursor(0, TFT_Y - 10);
     tft.print("Depth: ");
-    tft.print(storage.returnUser().depth);
+    tft.print(gps_storage.returnUser().depth);
     tft.print(" m");
 }
 
@@ -150,7 +152,7 @@ void DrawMap::updateCompass(float angle) {
 // Set to 0 to remove set course
 void DrawMap::updateCourseTo(int storage_id) {
     if (storage_id != 0) {
-        ScreenCoordinates screen_coords = convertGPSToScreenCoords(storage.returnUser(), storage.returnBookmark(storage_id), pixels_per_meter);
+        ScreenCoordinates screen_coords = convertGPSToScreenCoords(gps_storage.returnUser(), gps_storage.returnBookmark(storage_id), pixels_per_meter);
         // Draw course line
         tft.drawLine(TFT_CENTER_X, TFT_CENTER_Y, screen_coords.x, screen_coords.y, ST77XX_CYAN);
 
@@ -165,31 +167,31 @@ void DrawMap::updateCourseTo(int storage_id) {
         tft.print("Course to: ");
         tft.println(course_id);
         tft.print("Distance: ");
-        tft.print(distGPStoUser(storage, course_id));
+        tft.print(distGPStoUser(gps_storage, course_id));
 
         // Print depth info underneath selected dot
         tft.setTextColor(ST77XX_BLUE);
         tft.setCursor(screen_coords.x - 15, screen_coords.y + 5);
 
         char depth_text[6] = {};
-        tft.println(storage.returnBookmark(storage_id).depth);
+        tft.println(gps_storage.returnBookmark(storage_id).depth);
 
         // Print distance info underneath selected dot
         tft.setTextColor(ST77XX_ORANGE);
         tft.setCursor(screen_coords.x - 15, screen_coords.y + 15);
-        tft.println(distGPStoUser(storage, storage_id));
+        tft.println(distGPStoUser(gps_storage, storage_id));
     }
 }
 
 // Draw all GPS coordinates stored in the GpsStorage object
 void DrawMap::drawCoordinates() {
     // For every element in the storage array
-    if (storage.returnUser().latitude != 404 && storage.returnUser().longitude != 404) { // If the user exists
+    if (gps_storage.returnUser().latitude != 404 && gps_storage.returnUser().longitude != 404) { // If the user exists
         for (int i = 0; i < GPS_STORAGE_SLOTS; i++) {
             // Check for every bookmark if they exist
-            if ((storage.returnBookmark(i).latitude != 404) && (storage.returnBookmark(i).longitude != 404)) {
+            if ((gps_storage.returnBookmark(i).latitude != 404) && (gps_storage.returnBookmark(i).longitude != 404)) {
                 // If so, then we may calculate and draw the screen coordinates
-                ScreenCoordinates screen_coords = convertGPSToScreenCoords(storage.returnUser(), storage.returnBookmark(i), pixels_per_meter);
+                ScreenCoordinates screen_coords = convertGPSToScreenCoords(gps_storage.returnUser(), gps_storage.returnBookmark(i), pixels_per_meter);
 
                 // Draw screen coordinates on the screen if they're within the bounds of the screen
                 if (screen_coords.x != -1 && screen_coords.y != -1) {
@@ -206,10 +208,10 @@ void DrawMap::drawCoordinates() {
                             tft.println(i);
 
                             // Print depth info underneath selected dot if depth is set
-                            if (storage.returnBookmark(i).depth != -1) {
+                            if (gps_storage.returnBookmark(i).depth != -1) {
                                 tft.setTextColor(ST77XX_BLUE);
                                 tft.setCursor(screen_coords.x - 15, screen_coords.y + 5);
-                                tft.println(storage.returnBookmark(i).depth);
+                                tft.println(gps_storage.returnBookmark(i).depth);
                             }
                         }
                     }
@@ -223,8 +225,16 @@ DrawMenu::DrawMenu() {
     selected_item = 0;
 }
 
+void DrawMenu::loopMenu() {
+    current_time = millis();
+    if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
+        previous_time = current_time;
+        updateMenu();
+    }
+}
+
 // Draw menu elements, needs to be called once before loopMenu()
-void DrawMenu::showMenu() {
+void DrawMenu::updateMenu() {
     tft.fillScreen(BACKGROUND_COLOR); // Clear screen
 
     // Draw block for currently selected menu item
@@ -251,16 +261,60 @@ void DrawMenu::showMenu() {
 
 // Scroll one item up in the menu
 void DrawMenu::upMenu() {
-    if (selected_item > 0 && selected_item < MAX_ITEMS) {
+    if (selected_item > 0 && selected_item < MAX_MENU_ITEMS) {
         selected_item -= 1;
-        showMenu();
+        updateMenu();
     }
 }
 
 // Scroll one item down in the menu
 void DrawMenu::downMenu() {
-    if (selected_item >= 0 && selected_item < (MAX_ITEMS - 1)) {
+    if (selected_item >= 0 && selected_item < (MAX_MENU_ITEMS - 1)) {
         selected_item += 1;
-        showMenu();
+        updateMenu();
     }
+}
+
+DrawBookmarks::DrawBookmarks() {
+    selected_item = 1;
+}
+
+void DrawBookmarks::loopBookmarks() {
+    current_time = millis();
+    if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
+        previous_time = current_time;
+        updateBookmarks();
+    }
+}
+
+// Draw menu elements, list all bookmarks
+void DrawBookmarks::updateBookmarks() {
+    tft.fillScreen(BACKGROUND_COLOR); // Clear screen
+
+    // Draw block for currently selected menu item
+    tft.fillRoundRect(5, 18 - 2 + (MENU_SPACING * selected_item), 280, 16 + (2 * 2), 5, ST77XX_BLUE);
+
+    // Draw Text
+    tft.setTextWrap(true);
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setTextSize(2); // 12*16
+
+    for (int i = 0; i < MAX_MENU_ITEMS; i++) {
+        // Draw ID and description of each entry
+        if (i == 0) {
+            // Print Wipe currently set course instead of user
+            tft.setCursor(0, 20 + MENU_SPACING * i);
+            tft.setTextColor(ST77XX_ORANGE);
+            tft.println("=- Reset current course -=");
+            tft.setTextColor(ST77XX_WHITE);
+        } else {
+            tft.setCursor(0, 20 + MENU_SPACING * i);
+            tft.print(" ID: ");
+            tft.print(i);
+            tft.print(" - ");
+            tft.println(gps_storage.returnBookmark(i).description);
+        }
+    }
+
+    tft.setTextSize(1);
 }

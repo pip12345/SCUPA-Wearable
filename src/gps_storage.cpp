@@ -41,10 +41,13 @@ void GpsStorage::deleteBookmark(int slot) {
 }
 
 GpsCoordinates GpsStorage::returnBookmark(int slot) {
-    if (slot >= 1 && slot <= 31)
+    if (slot >= 1 && slot <= 31) {
         return arr[slot];
-    else
-        return GpsCoordinates(404, 404, -1, "ERROR");
+    } else if (slot == 0) {
+        return returnUser();
+    } else {
+        return GpsCoordinates(404, 404, -404, "ERROR OUTSIDE BOUNDS");
+    }
 }
 
 void GpsStorage::setUser(GpsCoordinates location) {
