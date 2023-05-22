@@ -67,31 +67,6 @@ void DrawMap::loopMap() {
     }
 }
 
-// Draw text in corners of screens
-void DrawMap::drawText() {
-    tft.setTextSize(1);
-    tft.setTextColor(ST77XX_WHITE);
-    tft.setTextWrap(true);
-
-    // Draw GPS text
-    tft.setCursor(0, 0);
-    tft.print("GPS: ");
-    tft.print(gps_storage.returnUser().latitude, 6);
-    tft.print(", ");
-    tft.print(gps_storage.returnUser().longitude, 6);
-
-    // Draw current pixel scale
-    tft.setCursor(TFT_X - 110, 0);
-    tft.print("Scale: ");
-    tft.print((float)(1 / pixels_per_meter));
-    tft.print(" m/px");
-
-    tft.setCursor(0, TFT_Y - 10);
-    tft.print("Depth: ");
-    tft.print(gps_storage.returnUser().depth);
-    tft.print(" m");
-}
-
 // Redraw radius rings and update text of radius rings
 void DrawMap::updateRingsRadiusText(int range_close, int range_medium) {
     // Convert range ints to const char arrays
@@ -158,36 +133,65 @@ void DrawMap::updateCompass(float angle) {
 
 // Updates course pointer to set id of a stored GPS coordinate
 void DrawMap::drawCourse() {
-    if (course_id != 0) { // If course ID is not the user
-        ScreenCoordinates screen_coords = convertGPSToScreenCoords(gps_storage.returnUser(), gps_storage.returnBookmark(course_id), pixels_per_meter);
-        // Draw course line
-        tft.drawLine(TFT_CENTER_X, TFT_CENTER_Y, screen_coords.x, screen_coords.y, ST77XX_CYAN);
+    if (course_id > 0 && course_id < GPS_STORAGE_SLOTS) { // If course ID is set and not outside bounds
+        if (gps_storage.returnBookmark(course_id).longitude != 404 && gps_storage.returnBookmark(course_id).latitude != 404) { // If the coordinate exists
+            ScreenCoordinates screen_coords = convertGPSToScreenCoords(gps_storage.returnUser(), gps_storage.returnBookmark(course_id), pixels_per_meter);
+            // Draw course line
+            tft.drawLine(TFT_CENTER_X, TFT_CENTER_Y, screen_coords.x, screen_coords.y, ST77XX_CYAN);
 
-        // Draw colored dot over the selected one
-        tft.fillCircle(screen_coords.x, screen_coords.y, LOCATION_DOT_SIZE + 1, ST77XX_MAGENTA);
+            // Draw colored dot over the selected one
+            tft.fillCircle(screen_coords.x, screen_coords.y, LOCATION_DOT_SIZE + 1, ST77XX_MAGENTA);
 
-        // Print course set to text
-        tft.setTextWrap(true);
-        tft.setTextSize(1);
-        tft.setTextColor(ST77XX_ORANGE);
-        tft.setCursor(0, 10);
-        tft.print("Course to: ");
-        tft.println(course_id);
-        tft.print("Distance: ");
-        tft.print(distGPStoUser(gps_storage, course_id));
+            // Print course set to text
+            tft.setTextWrap(true);
+            tft.setTextSize(1);
+            tft.setTextColor(ST77XX_ORANGE);
+            tft.setCursor(0, 10);
+            tft.print("Course to: ");
+            tft.println(course_id);
+            tft.print("Distance: ");
+            tft.print(distGPStoUser(gps_storage, course_id));
 
-        // Print depth info underneath selected dot
-        tft.setTextColor(ST77XX_BLUE);
-        tft.setCursor(screen_coords.x - 15, screen_coords.y + 5);
+            // Print depth info underneath selected dot
+            tft.setTextColor(ST77XX_BLUE);
+            tft.setCursor(screen_coords.x - 15, screen_coords.y + 5);
 
-        char depth_text[6] = {};
-        tft.println(gps_storage.returnBookmark(course_id).depth);
+            char depth_text[6] = {};
+            tft.println(gps_storage.returnBookmark(course_id).depth);
 
-        // Print distance info underneath selected dot
-        tft.setTextColor(ST77XX_ORANGE);
-        tft.setCursor(screen_coords.x - 15, screen_coords.y + 15);
-        tft.println(distGPStoUser(gps_storage, course_id));
+            // Print distance info underneath selected dot
+            tft.setTextColor(ST77XX_ORANGE);
+            tft.setCursor(screen_coords.x - 15, screen_coords.y + 15);
+            tft.println(distGPStoUser(gps_storage, course_id));
+        } else {
+            course_id = 0; // Reset course ID so no course will be drawn if it attempts to draw the coordinate to a non initialized GPS point
+        }
     }
+}
+
+// Draw text in corners of screens
+void DrawMap::drawText() {
+    tft.setTextSize(1);
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setTextWrap(true);
+
+    // Draw GPS text
+    tft.setCursor(0, 0);
+    tft.print("GPS: ");
+    tft.print(gps_storage.returnUser().latitude, 6);
+    tft.print(", ");
+    tft.print(gps_storage.returnUser().longitude, 6);
+
+    // Draw current pixel scale
+    tft.setCursor(TFT_X - 110, 0);
+    tft.print("Scale: ");
+    tft.print((float)(1 / pixels_per_meter));
+    tft.print(" m/px");
+
+    tft.setCursor(0, TFT_Y - 10);
+    tft.print("Depth: ");
+    tft.print(gps_storage.returnUser().depth);
+    tft.print(" m");
 }
 
 // Draw all GPS coordinates stored in the GpsStorage object except the user itself
@@ -301,6 +305,7 @@ void DrawBookmarks::loopBookmarks() {
             updateWarningPopUp();
             break;
         case 2:
+            updateInfoPanel();
             break;
         default:
             break;
@@ -365,6 +370,21 @@ void DrawBookmarks::updateWarningPopUp() {
     tft.println("Long press right to delete");
     tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 120);
     tft.println("Press left once to go back");
+}
+
+void DrawBookmarks::updateInfoPanel() {
+    // Don't clear screen on purpose, we want to still see what is in the background
+
+    // Draw textbox in the center of the screen
+    // Hardcoded because I'm lazy
+    tft.fillRoundRect(POPUP_SIZE, POPUP_SIZE, TFT_X - 2 * POPUP_SIZE, TFT_Y - 2 * POPUP_SIZE, 10, ST77XX_CYAN);
+    tft.setTextWrap(true);
+    tft.setTextSize(1);
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 20);
+    tft.print("ID: ");
+    tft.print(gps_storage.returnBookmark(selected_item).description);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// LEFT HERE
 }
 
 // Scroll one item up in the bookmark menu

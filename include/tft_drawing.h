@@ -101,7 +101,7 @@ class DrawBookmarks {
 
     void updateBookmarks();
     void updateWarningPopUp();
-    void updateDescription();
+    void updateInfoPanel();
 
     void upMenu();
     void downMenu();

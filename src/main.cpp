@@ -162,8 +162,11 @@ void loop() {
                     gps_map.setCourse(0); // Remove current course
                     Serial.println("Deleted course");
                 } else {
-                    // Go to show info panel state
+                    // Go to show description panel state
+                    bookmarks.current_sub_state = 2; /*info panel state*/ 
                 }
+            } else if (bookmarks.current_sub_state == 2) {
+                // DO THE STUFF OF THE INFO PANEL IN HERE
             }
         }
 
