@@ -145,11 +145,11 @@ void loop() {
             } else if (bookmarks.current_sub_state == bookmarks.Substate::warning_popup) {
                 // return to list
                 bookmarks.current_sub_state = bookmarks.Substate::list;
-                bookmarks.updateBookmarks();     // Force update bookmarks to make popup disappear instantly
+                bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
             } else if (bookmarks.current_sub_state == bookmarks.Substate::info_popup) {
                 // return to list
                 bookmarks.current_sub_state = bookmarks.Substate::list; /*list*/
-                bookmarks.updateBookmarks();     // Force update bookmarks to make popup disappear instantly
+                bookmarks.updateBookmarks();                            // Force update bookmarks to make popup disappear instantly
             }
         }
 
@@ -169,7 +169,7 @@ void loop() {
 
                 // return to list
                 bookmarks.current_sub_state = bookmarks.Substate::list;
-                bookmarks.updateBookmarks();     // Force update bookmarks to make popup disappear instantly
+                bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
             }
         }
 
@@ -186,8 +186,8 @@ void loop() {
 
                 // Delete GPS if in the popup state
                 gps_storage.deleteBookmark(bookmarks.returnSelectedItem());
-                bookmarks.current_sub_state = bookmarks.Substate::list; 
-                bookmarks.updateBookmarks();     // Force update bookmarks to make popup disappear instantly
+                bookmarks.current_sub_state = bookmarks.Substate::list;
+                bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
             }
         }
 

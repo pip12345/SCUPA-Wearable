@@ -106,8 +106,6 @@ void DrawMap::updateCompass(float angle) {
     x_offset = getCompassSine(angle);
     y_offset = getCompassCosine(angle);
 
-    // tft.fillCircle(TFT_CENTER_X, TFT_CENTER_Y, COMPASS_RADIUS + 1, BACKGROUND_COLOR); // Wipe area
-
     // Draw compass pointer
     tft.drawLine(TFT_CENTER_X, TFT_CENTER_Y, TFT_CENTER_X + x_offset, TFT_CENTER_Y + y_offset, ST77XX_RED);
 
@@ -133,7 +131,7 @@ void DrawMap::updateCompass(float angle) {
 
 // Updates course pointer to set id of a stored GPS coordinate
 void DrawMap::drawCourse() {
-    if (course_id > 0 && course_id < GPS_STORAGE_SLOTS) { // If course ID is set and not outside bounds
+    if (course_id > 0 && course_id < GPS_STORAGE_SLOTS) {                                                                      // If course ID is set and not outside bounds
         if (gps_storage.returnBookmark(course_id).longitude != 404 && gps_storage.returnBookmark(course_id).latitude != 404) { // If the coordinate exists
             ScreenCoordinates screen_coords = convertGPSToScreenCoords(gps_storage.returnUser(), gps_storage.returnBookmark(course_id), pixels_per_meter);
             // Draw course line
@@ -388,17 +386,17 @@ void DrawBookmarks::updateInfoPanel() {
     tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 30);
     tft.print("Latitude: ");
     tft.print(gps_storage.returnBookmark(selected_item).latitude, GPS_DECIMALS);
-    tft.print (" N");
+    tft.print(" N");
 
     tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 40);
     tft.print("Longitude: ");
     tft.print(gps_storage.returnBookmark(selected_item).longitude, GPS_DECIMALS);
-    tft.print (" E");
+    tft.print(" E");
 
     tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 50);
     tft.print("Distance: ");
     tft.print(distGPStoUser(gps_storage, selected_item));
-    tft.print (" m");
+    tft.print(" m");
 
     tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 70);
     tft.print("Description: ");
@@ -414,9 +412,6 @@ void DrawBookmarks::updateInfoPanel() {
     tft.setTextColor(ST77XX_WHITE);
     // tft.print("Description: ");
     // tft.print(gps_storage.returnBookmark(selected_item).description);
-    
-
-
 }
 
 // Scroll one item up in the bookmark menu

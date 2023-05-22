@@ -7,9 +7,32 @@ The tft library only works in a SINGLE cpp file because ????
 Therefore, all calls to tft must be done in the source file of this header
 ============== READ THIS ============*/
 
-// RGB565 COLOR PICKER http://www.barth-dev.de/online/rgb565-color-picker/
+/******************************************----- CLASS STRUCTURE ------******************************************
+ *
+ *   Each drawing class has the following general structure:
+ *
+ *   The loop gets called in the main program loop and will run one or more update functions every set interval of milliseconds.
+ *
+ *     - void loopX()
+ *
+ *
+ *   Update functions will retrieve new data (update) and then draw GUI elements. These get called either
+ *   in other update functions or in loopX().
+ *
+ *     - void updateX()
+ *
+ *
+ *   Optionally, classes where multiple windows appear will have sub states to switch between these windows.
+ *   In this case the loopX() function will contain a separate state machine to switch between these substates
+ *
+ *     - enum Substate {state1, state2, state3...};
+ *     - void updateState2()
+ *     - void updateState3()
+ *
+ *****************************************************************************************************************/
 
-#include "Adafruit_GFX.h"    // Core graphics library http://adafruit.github.io/Adafruit-GFX-Library/html/class_adafruit___g_f_x.html https://learn.adafruit.com/adafruit-gfx-graphics-library/overview
+// RGB565 COLOR PICKER http://www.barth-dev.de/online/rgb565-color-picker/
+#include "Adafruit_GFX.h"    // Core graphics library https://learn.adafruit.com/adafruit-gfx-graphics-library/overview
 #include "Adafruit_ST7789.h" // Hardware-specific library for ST7789 https://docs.circuitpython.org/projects/st7789/en/latest/index.html
 #include <Arduino.h>
 
@@ -109,7 +132,10 @@ class DrawBookmarks {
 
     int returnSelectedItem();
 
-    enum Substate {list, warning_popup, info_popup}; // substate
+    enum Substate { list,
+                    warning_popup,
+                    info_popup,
+                    add_bookmark }; // substate
     Substate current_sub_state{};
 
   private:
