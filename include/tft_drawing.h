@@ -31,6 +31,7 @@ Therefore, all calls to tft must be done in the source file of this header
 
 #define BACKGROUND_COLOR 0x0082
 #define LOCATION_DOT_SIZE 2
+#define GPS_DECIMALS 6 // nr of decimals when GPS gets printed
 
 // tolerance around screen borders before elements aren't drawn anymore (example: allows rendering of text beneath an off-screen dot)
 #define BORDER_TOLERANCE 50
@@ -108,13 +109,15 @@ class DrawBookmarks {
 
     int returnSelectedItem();
 
-    int current_sub_state{};
+    enum Substate {list, warning_popup, info_popup}; // substate
+    Substate current_sub_state{};
 
   private:
     const int MENU_SPACING = 18;
     const int MAX_MENU_ITEMS = 11; // show x+1 items at once (11 is 12 being shown)
     const int ITEM_BORDER_SIZE = 2;
     const int POPUP_SIZE = 50;
+    const int INFO_SIZE = 40;
 
     int selected_item{};
     int current_page{}; // current page of MAX_MENU_ITEMS bookmarks being displayed on the menu, first page = 0

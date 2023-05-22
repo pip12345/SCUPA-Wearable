@@ -155,8 +155,6 @@ void DrawMap::drawCourse() {
             // Print depth info underneath selected dot
             tft.setTextColor(ST77XX_BLUE);
             tft.setCursor(screen_coords.x - 15, screen_coords.y + 5);
-
-            char depth_text[6] = {};
             tft.println(gps_storage.returnBookmark(course_id).depth);
 
             // Print distance info underneath selected dot
@@ -178,9 +176,11 @@ void DrawMap::drawText() {
     // Draw GPS text
     tft.setCursor(0, 0);
     tft.print("GPS: ");
-    tft.print(gps_storage.returnUser().latitude, 6);
+    tft.print(gps_storage.returnUser().latitude, GPS_DECIMALS);
+    tft.print(" N");
     tft.print(", ");
-    tft.print(gps_storage.returnUser().longitude, 6);
+    tft.print(gps_storage.returnUser().longitude, GPS_DECIMALS);
+    tft.print(" E");
 
     // Draw current pixel scale
     tft.setCursor(TFT_X - 110, 0);
@@ -287,7 +287,7 @@ int DrawMenu::returnSelectedItem() {
 
 DrawBookmarks::DrawBookmarks() {
     selected_item = 1;
-    current_sub_state = 0; // starting state is list
+    current_sub_state = list; // starting state is list
 }
 
 // Update and redraw bookmarks after a time of UPDATE_INTERVAL has passed
@@ -298,13 +298,13 @@ void DrawBookmarks::loopBookmarks() {
 
         // State machine for handling different subwindows within the bookmarks menu
         switch (current_sub_state) {
-        case 0:
+        case list:
             updateBookmarks();
             break;
-        case 1:
+        case warning_popup:
             updateWarningPopUp();
             break;
-        case 2:
+        case info_popup:
             updateInfoPanel();
             break;
         default:
@@ -367,9 +367,9 @@ void DrawBookmarks::updateWarningPopUp() {
     tft.println("         this bookmark?");
     tft.setTextColor(ST77XX_WHITE);
     tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 100);
-    tft.println("Long press right to delete");
+    tft.println("LONG PRESS RIGHT to confirm");
     tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 120);
-    tft.println("Press left once to go back");
+    tft.println("Press LEFT to cancel");
 }
 
 void DrawBookmarks::updateInfoPanel() {
@@ -377,14 +377,46 @@ void DrawBookmarks::updateInfoPanel() {
 
     // Draw textbox in the center of the screen
     // Hardcoded because I'm lazy
-    tft.fillRoundRect(POPUP_SIZE, POPUP_SIZE, TFT_X - 2 * POPUP_SIZE, TFT_Y - 2 * POPUP_SIZE, 10, ST77XX_CYAN);
+    tft.fillRoundRect(INFO_SIZE, INFO_SIZE, TFT_X - 2 * INFO_SIZE, TFT_Y - 2 * INFO_SIZE, 10, ST77XX_ORANGE);
     tft.setTextWrap(true);
     tft.setTextSize(1);
-    tft.setTextColor(ST77XX_WHITE);
-    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 20);
+    tft.setTextColor(ST77XX_WHITE, ST77XX_ORANGE);
+    tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 10);
     tft.print("ID: ");
+    tft.print(selected_item);
+
+    tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 30);
+    tft.print("Latitude: ");
+    tft.print(gps_storage.returnBookmark(selected_item).latitude, GPS_DECIMALS);
+    tft.print (" N");
+
+    tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 40);
+    tft.print("Longitude: ");
+    tft.print(gps_storage.returnBookmark(selected_item).longitude, GPS_DECIMALS);
+    tft.print (" E");
+
+    tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 50);
+    tft.print("Distance: ");
+    tft.print(distGPStoUser(gps_storage, selected_item));
+    tft.print (" m");
+
+    tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 70);
+    tft.print("Description: ");
+    tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 80);
     tft.print(gps_storage.returnBookmark(selected_item).description);
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// LEFT HERE
+    tft.setTextColor(ST77XX_WHITE);
+
+    tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 130);
+    tft.print("Press RIGHT to set course ");
+    tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 140);
+    tft.print("Press LEFT to go back");
+
+    tft.setTextColor(ST77XX_WHITE);
+    // tft.print("Description: ");
+    // tft.print(gps_storage.returnBookmark(selected_item).description);
+    
+
+
 }
 
 // Scroll one item up in the bookmark menu

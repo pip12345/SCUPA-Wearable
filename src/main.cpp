@@ -120,11 +120,7 @@ void loop() {
         }
 
         if (btn_right_pressed) {
-            if (gps_map.returnCourse() != 4) {
-                gps_map.setCourse(4);
-            } else {
-                gps_map.setCourse(0);
-            }
+            // something here still?
         }
 
         break;
@@ -143,47 +139,54 @@ void loop() {
 
         if (btn_left_pressed) {
             // Button press actions per sub state
-            if (bookmarks.current_sub_state == 0 /*list state*/) {
+            if (bookmarks.current_sub_state == bookmarks.Substate::list) {
                 // return to main menu
                 current_state = main_menu;
-                Serial.println("returned to menu");
-            } else if (bookmarks.current_sub_state == 1 /*warning popup state*/) {
+            } else if (bookmarks.current_sub_state == bookmarks.Substate::warning_popup) {
                 // return to list
-                bookmarks.current_sub_state = 0; /*list*/
+                bookmarks.current_sub_state = bookmarks.Substate::list;
                 bookmarks.updateBookmarks();     // Force update bookmarks to make popup disappear instantly
-                Serial.println("returned to list");
+            } else if (bookmarks.current_sub_state == bookmarks.Substate::info_popup) {
+                // return to list
+                bookmarks.current_sub_state = bookmarks.Substate::list; /*list*/
+                bookmarks.updateBookmarks();     // Force update bookmarks to make popup disappear instantly
             }
         }
 
         if (btn_right_pressed) {
             // Button press actions per sub state
-            if (bookmarks.current_sub_state == 0 /*list state*/) {
+            if (bookmarks.current_sub_state == bookmarks.Substate::list) {
                 if (bookmarks.returnSelectedItem() == 0) {
                     gps_map.setCourse(0); // Remove current course
                     Serial.println("Deleted course");
                 } else {
-                    // Go to show description panel state
-                    bookmarks.current_sub_state = 2; /*info panel state*/ 
+                    // Go to show info panel state
+                    bookmarks.current_sub_state = bookmarks.Substate::info_popup;
                 }
-            } else if (bookmarks.current_sub_state == 2) {
-                // DO THE STUFF OF THE INFO PANEL IN HERE
+            } else if (bookmarks.current_sub_state == bookmarks.Substate::info_popup) {
+                // Set course to the selected item if confirmed in the info panel
+                gps_map.setCourse(bookmarks.returnSelectedItem());
+
+                // return to list
+                bookmarks.current_sub_state = bookmarks.Substate::list;
+                bookmarks.updateBookmarks();     // Force update bookmarks to make popup disappear instantly
             }
         }
 
         if (btn_right_long_pressed) {
             // Button press actions per sub state
-            if (bookmarks.current_sub_state == 0 /*list state*/) {
+            if (bookmarks.current_sub_state == bookmarks.Substate::list) {
 
                 if (bookmarks.returnSelectedItem() != 0) {
                     // Show warning popup if in the list state
-                    bookmarks.current_sub_state = 1; /*warning popup state*/
+                    bookmarks.current_sub_state = bookmarks.Substate::warning_popup;
                 }
 
-            } else if (bookmarks.current_sub_state == 1 /*warning popup state*/) {
+            } else if (bookmarks.current_sub_state == bookmarks.Substate::warning_popup) {
 
                 // Delete GPS if in the popup state
                 gps_storage.deleteBookmark(bookmarks.returnSelectedItem());
-                bookmarks.current_sub_state = 0; // Return to list substate
+                bookmarks.current_sub_state = bookmarks.Substate::list; 
                 bookmarks.updateBookmarks();     // Force update bookmarks to make popup disappear instantly
             }
         }
