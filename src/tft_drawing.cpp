@@ -183,11 +183,11 @@ void DrawMap::updateCourseTo(int storage_id) {
     }
 }
 
-// Draw all GPS coordinates stored in the GpsStorage object
+// Draw all GPS coordinates stored in the GpsStorage object except the user itself
 void DrawMap::drawCoordinates() {
-    // For every element in the storage array
+    // For every element in the storage array except the first one (which is the user)
     if (gps_storage.returnUser().latitude != 404 && gps_storage.returnUser().longitude != 404) { // If the user exists
-        for (int i = 0; i < GPS_STORAGE_SLOTS; i++) {
+        for (int i = 1; i < GPS_STORAGE_SLOTS; i++) {
             // Check for every bookmark if they exist
             if ((gps_storage.returnBookmark(i).latitude != 404) && (gps_storage.returnBookmark(i).longitude != 404)) {
                 // If so, then we may calculate and draw the screen coordinates
@@ -225,6 +225,7 @@ DrawMenu::DrawMenu() {
     selected_item = 0;
 }
 
+// Update and redraw menu after a time of UPDATE_INTERVAL has passed 
 void DrawMenu::loopMenu() {
     current_time = millis();
     if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
@@ -247,14 +248,12 @@ void DrawMenu::updateMenu() {
     tft.setTextSize(2); // 12*16
     tft.println(" Map");
     tft.setCursor(0, 20 + MENU_SPACING);
-    tft.println(" List Bookmarks");
+    tft.println(" Bookmarks");
     tft.setCursor(0, 20 + MENU_SPACING * 2);
-    tft.println(" Save Bookmark");
-    tft.setCursor(0, 20 + MENU_SPACING * 3);
     tft.println(" Check Messages");
-    tft.setCursor(0, 20 + MENU_SPACING * 4);
+    tft.setCursor(0, 20 + MENU_SPACING * 3);
     tft.println(" Send Message");
-    tft.setCursor(0, 20 + MENU_SPACING * 5);
+    tft.setCursor(0, 20 + MENU_SPACING * 4);
     tft.println(" Send Emergency Message");
     tft.setTextSize(1);
 }
@@ -279,6 +278,7 @@ DrawBookmarks::DrawBookmarks() {
     selected_item = 1;
 }
 
+// Update and redraw bookmarks after a time of UPDATE_INTERVAL has passed 
 void DrawBookmarks::loopBookmarks() {
     current_time = millis();
     if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
@@ -305,7 +305,7 @@ void DrawBookmarks::updateBookmarks() {
             // Print Wipe currently set course instead of user
             tft.setCursor(0, 20 + MENU_SPACING * i);
             tft.setTextColor(ST77XX_ORANGE);
-            tft.println("=- Reset current course -=");
+            tft.println("=- Remove current course -=");
             tft.setTextColor(ST77XX_WHITE);
         } else {
             tft.setCursor(0, 20 + MENU_SPACING * i);
@@ -318,3 +318,22 @@ void DrawBookmarks::updateBookmarks() {
 
     tft.setTextSize(1);
 }
+
+// Scroll one item up in the bookmark menu
+void DrawBookmarks::upMenu()
+{
+    if (selected_item > 0 && selected_item < MAX_MENU_ITEMS) {
+        selected_item -= 1;
+        updateBookmarks();
+    }
+}
+
+// Scroll one item down in the bookmark menu
+void DrawBookmarks::downMenu()
+{
+    if (selected_item >= 0 && selected_item < (MAX_MENU_ITEMS - 1)) {
+        selected_item += 1;
+        updateBookmarks();
+    }
+}
+

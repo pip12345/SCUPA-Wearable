@@ -50,6 +50,9 @@ class DrawMap {
     void loopMap();   // runs updateMap() every set UPDATE_INTERVAL milliseconds
     void updateMap(); // Update and redraw the map with the given storage data
 
+    void updateCourseTo(int storage_id);
+    void updateCompass(float angle);
+
     float pixels_per_meter; // Pixels per meter scale for scaling the map, used for calculating on-screen distances
     float compass_angle{};
     int course_id{};
@@ -57,8 +60,6 @@ class DrawMap {
   private:
     void drawText();
     void updateRingsRadiusText(int range_close, int range_medium);
-    void updateCourseTo(int storage_id);
-    void updateCompass(float angle);
     void drawCoordinates();
 
     const char RANGE_CIRCLE_RAD_CLOSE = 50; // char if value is less than 127
@@ -82,7 +83,7 @@ class DrawMenu {
 
   private:
     const int MENU_SPACING = 35;  // spacing between each item in the menu
-    const int MAX_MENU_ITEMS = 6; // 6 items in menu
+    const int MAX_MENU_ITEMS = 5; // 6 items in menu
 
     int current_time{}; // Used for time-based actions
     int previous_time{};
@@ -98,11 +99,14 @@ class DrawBookmarks {
     void upMenu();
     void downMenu();
 
+    void displayInfo();
+    void warningPopUp();
+
     int selected_item{};
 
   private:
     const int MENU_SPACING = 18;
-    const int MAX_MENU_ITEMS = 6; // show x items as once
+    const int MAX_MENU_ITEMS = 12; // show x items as once
 
     int current_time{}; // Used for time-based actions
     int previous_time{};

@@ -21,7 +21,6 @@ bool btn_up_pressed{}, btn_down_pressed{}, btn_left_pressed{}, btn_right_pressed
 enum State { main_menu,
              map_display,
              list_bookmarks,
-             save_bookmark,
              check_messages,
              send_message,
              send_emergency };
@@ -69,6 +68,9 @@ void setup() {
     gps_storage.addBookmark(12.195009, -69.046143, 31, "Shipwreck", 2);
     gps_storage.addBookmark(12.197472, -69.047321, 0, "Cool boat", 3);
     gps_storage.addBookmark(12.196264, -69.051067, 0, "Beach", 4);
+    for (int i = 5; i < 32; i++) {
+        gps_storage.addBookmark(10+i, 10+i, 0, "Filler", i);
+    }
     /////// DEBUG //////////
 
     for (int i = 0; i < 5; i++) {
@@ -90,12 +92,10 @@ void loop() {
 
         if (btn_up_pressed) {
             menu.upMenu();
-            Serial.println(menu.selected_item);
         }
 
         if (btn_down_pressed) {
             menu.downMenu();
-            Serial.println(menu.selected_item);
         }
 
         if (btn_right_pressed) {
@@ -136,9 +136,11 @@ void loop() {
         bookmarks.loopBookmarks();
 
         if (btn_up_pressed) {
+            bookmarks.upMenu();
         }
 
         if (btn_down_pressed) {
+            bookmarks.downMenu();
         }
 
         if (btn_left_pressed) {
@@ -147,14 +149,21 @@ void loop() {
         }
 
         if (btn_right_pressed) {
+            if (bookmarks.selected_item == 0) {
+                gps_map.updateCourseTo(0); // Remove current course
+            } else {
+                // show info
+            }
         }
 
-        break;
+        if (btn_right_long_pressed) {
+            if (bookmarks.selected_item != 0) {
+                // To do: display warning popup
+                // Delete that bookmark
+                gps_storage.deleteBookmark(bookmarks.selected_item);
+            }
+        }
 
-    case save_bookmark:
-        // code here
-        Serial.println("save bookmark selected");
-        current_state = main_menu;
         break;
     case check_messages:
         // code here
