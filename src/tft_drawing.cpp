@@ -45,8 +45,19 @@ void DrawMap::updateMap() {
 
     // TO DO: ADD FUNCTION HERE THAT GETS THE LATEST COMPASS ANGLE FROM MAGNETOMETER
     // TO DO: ADD FUNCTION THAT SETS THE COURSE
-    updateCourseTo(course_id);    // set course
+    drawCourse();    // update course to the set course_id
     updateCompass(compass_angle); // Update compass
+}
+
+void DrawMap::setCourse(int course_storage_id)
+{
+    if (course_storage_id >= 0 && course_storage_id < GPS_STORAGE_SLOTS)
+        course_id = course_storage_id;
+}
+
+int DrawMap::returnCourse()
+{
+    return course_id;
 }
 
 // Update and redraw map after a time of UPDATE_INTERVAL has passed
@@ -149,9 +160,9 @@ void DrawMap::updateCompass(float angle) {
 
 // Updates course pointer to set id of a stored GPS coordinate
 // Set to 0 to remove set course
-void DrawMap::updateCourseTo(int storage_id) {
-    if (storage_id != 0) {
-        ScreenCoordinates screen_coords = convertGPSToScreenCoords(gps_storage.returnUser(), gps_storage.returnBookmark(storage_id), pixels_per_meter);
+void DrawMap::drawCourse() {
+    if (course_id != 0) {
+        ScreenCoordinates screen_coords = convertGPSToScreenCoords(gps_storage.returnUser(), gps_storage.returnBookmark(course_id), pixels_per_meter);
         // Draw course line
         tft.drawLine(TFT_CENTER_X, TFT_CENTER_Y, screen_coords.x, screen_coords.y, ST77XX_CYAN);
 
@@ -173,12 +184,12 @@ void DrawMap::updateCourseTo(int storage_id) {
         tft.setCursor(screen_coords.x - 15, screen_coords.y + 5);
 
         char depth_text[6] = {};
-        tft.println(gps_storage.returnBookmark(storage_id).depth);
+        tft.println(gps_storage.returnBookmark(course_id).depth);
 
         // Print distance info underneath selected dot
         tft.setTextColor(ST77XX_ORANGE);
         tft.setCursor(screen_coords.x - 15, screen_coords.y + 15);
-        tft.println(distGPStoUser(gps_storage, storage_id));
+        tft.println(distGPStoUser(gps_storage, course_id));
     }
 }
 
@@ -288,7 +299,7 @@ void DrawBookmarks::updateBookmarks() {
 
     // Draw block for currently selected menu item
     // Always resets back to the first location when going to the next page
-    tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + ((MENU_SPACING * selected_item) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)), 280, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
+    tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + ((MENU_SPACING * selected_item) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)), 315, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
 
     // Draw Text
     tft.setTextWrap(false); // Disable text wrap because it may screw with the element positioning in the menu

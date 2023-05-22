@@ -60,6 +60,7 @@ void setup() {
     btn_right.begin(RIGHT_PIN);
     btn_right.setClickHandler(btn_pressed);
     btn_right.setLongClickHandler(btn_longclick);
+    btn_right.setLongClickTime(500); // Longclick is 500 ms
 
     /////// DEBUG //////////
     // Distance between userlocation and seahorses is 139.85 m
@@ -123,10 +124,10 @@ void loop() {
         }
 
         if (btn_right_pressed) {
-            if (gps_map.course_id != 4) {
-                gps_map.course_id = 4;
+            if (gps_map.returnCourse() != 4) {
+                gps_map.setCourse(4);
             } else {
-                gps_map.course_id = 0;
+                gps_map.setCourse(0);
             }
         }
 
@@ -151,7 +152,8 @@ void loop() {
 
         if (btn_right_pressed) {
             if (bookmarks.selected_item == 0) {
-                gps_map.updateCourseTo(0); // Remove current course
+                gps_map.setCourse(0); // Remove current course
+                Serial.println("Deleted course");
             } else {
                 // show info
             }

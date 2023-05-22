@@ -50,17 +50,19 @@ class DrawMap {
     void loopMap();   // runs updateMap() every set UPDATE_INTERVAL milliseconds
     void updateMap(); // Update and redraw the map with the given storage data
 
-    void updateCourseTo(int storage_id);
+    void setCourse(int course_id); // set course to given id, 0 = no course set
+    int returnCourse();
     void updateCompass(float angle);
 
     float pixels_per_meter{}; // Pixels per meter scale for scaling the map, used for calculating on-screen distances
     float compass_angle{};
-    int course_id{};
 
   private:
+    void drawCourse();
     void drawText();
     void updateRingsRadiusText(int range_close, int range_medium);
     void drawCoordinates();
+    int course_id{}; // holds currently set course and gets used by drawCourse when drawing the course line
 
     const char RANGE_CIRCLE_RAD_CLOSE = 50; // char if value is less than 127
     const char RANGE_CIRCLE_RAD_MEDIUM = 100;
