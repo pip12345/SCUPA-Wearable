@@ -71,6 +71,7 @@ void setup() {
     for (int i = 5; i < 32; i++) {
         gps_storage.addBookmark(10+i, 10+i, 0, "Filler", i);
     }
+    gps_storage.addBookmark(69, 69, 0, "This was painful", 63);
     /////// DEBUG //////////
 
     for (int i = 0; i < 5; i++) {

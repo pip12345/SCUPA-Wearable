@@ -220,7 +220,7 @@ void DrawMap::drawCoordinates() {
     }
 }
 
-// Update and redraw menu after a time of UPDATE_INTERVAL has passed 
+// Update and redraw menu after a time of UPDATE_INTERVAL has passed
 void DrawMenu::loopMenu() {
     current_time = millis();
     if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
@@ -273,7 +273,7 @@ DrawBookmarks::DrawBookmarks() {
     selected_item = 1;
 }
 
-// Update and redraw bookmarks after a time of UPDATE_INTERVAL has passed 
+// Update and redraw bookmarks after a time of UPDATE_INTERVAL has passed
 void DrawBookmarks::loopBookmarks() {
     current_time = millis();
     if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
@@ -288,64 +288,72 @@ void DrawBookmarks::updateBookmarks() {
 
     // Draw block for currently selected menu item
     // Always resets back to the first location when going to the next page
-    tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + ( (MENU_SPACING * selected_item) - (current_page * MENU_SPACING * MAX_MENU_ITEMS) ), 280, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
+    tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + ((MENU_SPACING * selected_item) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)), 280, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
 
     // Draw Text
-    tft.setTextWrap(true);
+    tft.setTextWrap(false); // Disable text wrap because it may screw with the element positioning in the menu
     tft.setTextColor(ST77XX_WHITE);
     tft.setTextSize(2); // 12*16
 
-    
     for (int i = current_page * MAX_MENU_ITEMS; i <= (current_page * MAX_MENU_ITEMS) + MAX_MENU_ITEMS; i++) {
-        // Draw ID and description of each entry
-        if (i == 0) {
-            // Print Wipe currently set course instead of user for the first GPS coordinate
-            tft.setCursor(0, 20 + MENU_SPACING * i);
-            tft.setTextColor(ST77XX_ORANGE);
-            tft.println("=-Remove current course-=");
-            tft.setTextColor(ST77XX_WHITE);
-        } else {
-            // Draw the correct GPS storage spot based on the page
-            tft.setCursor(0, 20 + ((MENU_SPACING * i) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)));
-            tft.print(" ID: ");
-            tft.print(i);
-            tft.print(" - ");
-            tft.println(gps_storage.returnBookmark(i).description);
+        if (i < GPS_STORAGE_SLOTS) {
+            // Draw ID and description of each entry
+            if (i == 0) {
+                // Print Wipe currently set course instead of user for the first GPS coordinate
+                tft.setCursor(0, 20 + MENU_SPACING * i);
+                tft.setTextColor(ST77XX_ORANGE);
+                tft.println("=-Remove current course-=");
+                tft.setTextColor(ST77XX_WHITE);
+            } else {
+                // Draw the correct GPS storage spot based on the page
+                tft.setCursor(0, 20 + ((MENU_SPACING * i) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)));
+                tft.print(" ID: ");
+                tft.print(i);
+                tft.print(" - ");
+                tft.println(gps_storage.returnBookmark(i).description);
+            }
         }
     }
-
+    tft.setTextWrap(true);
     tft.setTextSize(1);
 }
 
 // Scroll one item up in the bookmark menu
-void DrawBookmarks::upMenu()
-{
+void DrawBookmarks::upMenu() {
     if (selected_item > 0 && selected_item < GPS_STORAGE_SLOTS) {
         selected_item -= 1;
+
+        /* We can calculate the current page by rounding down
+        selected_item, then dividing it by 11.
+        We do that because there are 11 unique elements per page since the last
+        element always gets redrawn at the top of the next page. */
+
+        current_page = (float)(int)(selected_item + 0.5) / 11; // use datatype rounding down trick
+        Serial.print("selected_item: ");
+        Serial.println(selected_item);
+        Serial.print("current_page: ");
+        Serial.println(current_page);
+
         updateBookmarks();
     }
-
-    current_page = (float)((int)(selected_item + 0.5) / 12);
-    Serial.print("selected_item: ");
-    Serial.println(selected_item);
-    Serial.print("current_page: ");
-    Serial.println(current_page);
 }
 
 // Scroll one item down in the bookmark menu
-void DrawBookmarks::downMenu()
-{
+void DrawBookmarks::downMenu() {
     if (selected_item >= 0 && selected_item < (GPS_STORAGE_SLOTS - 1)) {
         selected_item += 1;
+
+        /* We can calculate the current page by rounding down
+        selected_item, then dividing it by 11.
+        We do that because there are 11 unique elements per page since the last
+        element always gets redrawn at the top of the next page. */
+
+        current_page = (float)(int)(selected_item + 0.5) / 11; // use datatype rounding down trick
+        Serial.print("selected_item: ");
+        Serial.println(selected_item);
+        Serial.print("current_page: ");
+        Serial.println(current_page);
+
         updateBookmarks();
     }
-
-    // We can calculate the current page by rounding down the 
-    // selected_item value, then dividing it by 12
-    current_page = (float)(int)(selected_item + 1 + 0.5) / 12;
-    Serial.print("selected_item: ");
-    Serial.println(selected_item);
-    Serial.print("current_page: ");
-    Serial.println(current_page);
 }
-
