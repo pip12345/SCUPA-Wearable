@@ -53,7 +53,7 @@ class DrawMap {
     void updateCourseTo(int storage_id);
     void updateCompass(float angle);
 
-    float pixels_per_meter; // Pixels per meter scale for scaling the map, used for calculating on-screen distances
+    float pixels_per_meter{}; // Pixels per meter scale for scaling the map, used for calculating on-screen distances
     float compass_angle{};
     int course_id{};
 
@@ -72,8 +72,6 @@ class DrawMap {
 
 class DrawMenu {
   public:
-    DrawMenu();
-
     void loopMenu(); // runs updateMenu() every set UPDATE_INTERVAL millsieconds
     void updateMenu();
     void upMenu();
@@ -84,6 +82,7 @@ class DrawMenu {
   private:
     const int MENU_SPACING = 35;  // spacing between each item in the menu
     const int MAX_MENU_ITEMS = 5; // 6 items in menu
+    const int ITEM_BORDER_SIZE = 5;
 
     int current_time{}; // Used for time-based actions
     int previous_time{};
@@ -103,10 +102,12 @@ class DrawBookmarks {
     void warningPopUp();
 
     int selected_item{};
+    int current_page{}; // current page of MAX_MENU_ITEMS bookmarks being displayed on the menu, first page = 0
 
   private:
     const int MENU_SPACING = 18;
-    const int MAX_MENU_ITEMS = 12; // show x items as once
+    const int MAX_MENU_ITEMS = 11; // show x+1 items at once (11 is 12 being shown)
+    const int ITEM_BORDER_SIZE = 2;
 
     int current_time{}; // Used for time-based actions
     int previous_time{};

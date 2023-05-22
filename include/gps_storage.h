@@ -6,10 +6,10 @@
 #define GPS_STORAGE_SLOTS 64
 
 struct GpsCoordinates {
-    float latitude;     // Latitude example: 12.195722 (N) - y axis, 404 is uninitialized
-    float longitude;    // Longitude example: -69.046859 (W) - x axis, 404 is uninitialized
-    float depth;        // depth in meters, stored as a positive number, -1 means no depth stored
-    String description; /// Description that goes along with the coordinates
+    float latitude{};     // Latitude example: 12.195722 (N) - y axis, 404 is uninitialized
+    float longitude{};    // Longitude example: -69.046859 (W) - x axis, 404 is uninitialized
+    float depth{};        // depth in meters, stored as a positive number, -1 means no depth stored
+    String description{}; /// Description that goes along with the coordinates
 
     GpsCoordinates();
     GpsCoordinates(double latitude, double longitude, float depth, String description);

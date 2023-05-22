@@ -21,27 +21,27 @@ GpsCoordinates::GpsCoordinates(double latitude, double longitude, float depth) {
 }
 
 void GpsStorage::addBookmark(GpsCoordinates location, int slot) {
-    if (slot >= 1 && slot <= 31)
+    if (slot >= 1 && slot < GPS_STORAGE_SLOTS)
         arr[slot] = location;
 }
 
 void GpsStorage::addBookmark(double latitude, double longitude, float depth, int slot) {
-    if (slot >= 1 && slot <= 31)
+    if (slot >= 1 && slot < GPS_STORAGE_SLOTS)
         arr[slot] = GpsCoordinates(latitude, longitude, depth);
 }
 
 void GpsStorage::addBookmark(double latitude, double longitude, float depth, String description, int slot) {
-    if (slot >= 1 && slot <= 31)
+    if (slot >= 1 && slot < GPS_STORAGE_SLOTS)
         arr[slot] = GpsCoordinates(latitude, longitude, depth, description);
 }
 
 void GpsStorage::deleteBookmark(int slot) {
-    if (slot >= 1 && slot <= 31)
+    if (slot >= 1 && slot < GPS_STORAGE_SLOTS)
         arr[slot] = GpsCoordinates(); // set value back to uninitialized values
 }
 
 GpsCoordinates GpsStorage::returnBookmark(int slot) {
-    if (slot >= 1 && slot <= 31) {
+    if (slot >= 1 && slot < GPS_STORAGE_SLOTS) {
         return arr[slot];
     } else if (slot == 0) {
         return returnUser();

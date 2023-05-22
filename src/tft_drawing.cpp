@@ -29,7 +29,6 @@ void DrawController::resetTextToDefault() {
 // constructor
 DrawMap::DrawMap() {
     pixels_per_meter = 0.4;
-    course_id = 0;
     compass_angle = 90;
 }
 
@@ -221,10 +220,6 @@ void DrawMap::drawCoordinates() {
     }
 }
 
-DrawMenu::DrawMenu() {
-    selected_item = 0;
-}
-
 // Update and redraw menu after a time of UPDATE_INTERVAL has passed 
 void DrawMenu::loopMenu() {
     current_time = millis();
@@ -239,7 +234,7 @@ void DrawMenu::updateMenu() {
     tft.fillScreen(BACKGROUND_COLOR); // Clear screen
 
     // Draw block for currently selected menu item
-    tft.fillRoundRect(5, 18 - 5 + (MENU_SPACING * selected_item), 280, 16 + (5 * 2), 5, ST77XX_BLUE);
+    tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + (MENU_SPACING * selected_item), 280, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
 
     // Draw Text
     tft.setTextWrap(true);
@@ -292,23 +287,26 @@ void DrawBookmarks::updateBookmarks() {
     tft.fillScreen(BACKGROUND_COLOR); // Clear screen
 
     // Draw block for currently selected menu item
-    tft.fillRoundRect(5, 18 - 2 + (MENU_SPACING * selected_item), 280, 16 + (2 * 2), 5, ST77XX_BLUE);
+    // Always resets back to the first location when going to the next page
+    tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + ( (MENU_SPACING * selected_item) - (current_page * MENU_SPACING * MAX_MENU_ITEMS) ), 280, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
 
     // Draw Text
     tft.setTextWrap(true);
     tft.setTextColor(ST77XX_WHITE);
     tft.setTextSize(2); // 12*16
 
-    for (int i = 0; i < MAX_MENU_ITEMS; i++) {
+    
+    for (int i = current_page * MAX_MENU_ITEMS; i <= (current_page * MAX_MENU_ITEMS) + MAX_MENU_ITEMS; i++) {
         // Draw ID and description of each entry
         if (i == 0) {
-            // Print Wipe currently set course instead of user
+            // Print Wipe currently set course instead of user for the first GPS coordinate
             tft.setCursor(0, 20 + MENU_SPACING * i);
             tft.setTextColor(ST77XX_ORANGE);
-            tft.println("=- Remove current course -=");
+            tft.println("=-Remove current course-=");
             tft.setTextColor(ST77XX_WHITE);
         } else {
-            tft.setCursor(0, 20 + MENU_SPACING * i);
+            // Draw the correct GPS storage spot based on the page
+            tft.setCursor(0, 20 + ((MENU_SPACING * i) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)));
             tft.print(" ID: ");
             tft.print(i);
             tft.print(" - ");
@@ -322,18 +320,32 @@ void DrawBookmarks::updateBookmarks() {
 // Scroll one item up in the bookmark menu
 void DrawBookmarks::upMenu()
 {
-    if (selected_item > 0 && selected_item < MAX_MENU_ITEMS) {
+    if (selected_item > 0 && selected_item < GPS_STORAGE_SLOTS) {
         selected_item -= 1;
         updateBookmarks();
     }
+
+    current_page = (float)((int)(selected_item + 0.5) / 12);
+    Serial.print("selected_item: ");
+    Serial.println(selected_item);
+    Serial.print("current_page: ");
+    Serial.println(current_page);
 }
 
 // Scroll one item down in the bookmark menu
 void DrawBookmarks::downMenu()
 {
-    if (selected_item >= 0 && selected_item < (MAX_MENU_ITEMS - 1)) {
+    if (selected_item >= 0 && selected_item < (GPS_STORAGE_SLOTS - 1)) {
         selected_item += 1;
         updateBookmarks();
     }
+
+    // We can calculate the current page by rounding down the 
+    // selected_item value, then dividing it by 12
+    current_page = (float)(int)(selected_item + 1 + 0.5) / 12;
+    Serial.print("selected_item: ");
+    Serial.println(selected_item);
+    Serial.print("current_page: ");
+    Serial.println(current_page);
 }
 
