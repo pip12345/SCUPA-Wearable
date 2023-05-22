@@ -79,12 +79,14 @@ class DrawMenu {
     void upMenu();
     void downMenu();
 
-    int selected_item{};
+    int returnSelectedItem();
 
   private:
     const int MENU_SPACING = 35;  // spacing between each item in the menu
     const int MAX_MENU_ITEMS = 5; // 6 items in menu
     const int ITEM_BORDER_SIZE = 5;
+
+    int selected_item{};
 
     int current_time{}; // Used for time-based actions
     int previous_time{};
@@ -95,22 +97,29 @@ class DrawBookmarks {
   public:
     DrawBookmarks();
 
-    void loopBookmarks();
+    void loopBookmarks(); // runs updateBookmarks() every set UPDATE_INTERVAL millsieconds
+
     void updateBookmarks();
+    void updateWarningPopUp();
+    void updateDescription();
+
     void upMenu();
     void downMenu();
 
-    void displayInfo();
-    void warningPopUp();
+    int returnSelectedItem();
 
-    int selected_item{};
-    int current_page{}; // current page of MAX_MENU_ITEMS bookmarks being displayed on the menu, first page = 0
+    int current_sub_state{};
 
   private:
     const int MENU_SPACING = 18;
     const int MAX_MENU_ITEMS = 11; // show x+1 items at once (11 is 12 being shown)
     const int ITEM_BORDER_SIZE = 2;
+    const int POPUP_SIZE = 50;
 
+    int selected_item{};
+    int current_page{}; // current page of MAX_MENU_ITEMS bookmarks being displayed on the menu, first page = 0
+
+    // State machine within loopBookmarks() handles subwindows
     int current_time{}; // Used for time-based actions
     int previous_time{};
     const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms

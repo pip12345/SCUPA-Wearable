@@ -70,14 +70,10 @@ void setup() {
     gps_storage.addBookmark(12.197472, -69.047321, 0, "Cool boat", 3);
     gps_storage.addBookmark(12.196264, -69.051067, 0, "Beach", 4);
     for (int i = 5; i < 32; i++) {
-        gps_storage.addBookmark(10+i, 10+i, 0, "Filler", i);
+        gps_storage.addBookmark(10 + i, 10 + i, 0, "Filler", i);
     }
     gps_storage.addBookmark(69, 69, 0, "This was painful", 63);
     /////// DEBUG //////////
-
-    for (int i = 0; i < 5; i++) {
-        Serial.println(gps_storage.returnBookmark(i).description);
-    }
 
     Serial.println("Setup finished");
 }
@@ -102,7 +98,7 @@ void loop() {
 
         if (btn_right_pressed) {
             // Convert selected_item to current_state
-            current_state = menu.selected_item + 1;
+            current_state = menu.returnSelectedItem() + 1;
         }
         break;
     case map_display:
@@ -146,24 +142,46 @@ void loop() {
         }
 
         if (btn_left_pressed) {
-            // return to main menu
-            current_state = main_menu;
+            // Button press actions per sub state
+            if (bookmarks.current_sub_state == 0 /*list state*/) {
+                // return to main menu
+                current_state = main_menu;
+                Serial.println("returned to menu");
+            } else if (bookmarks.current_sub_state == 1 /*warning popup state*/) {
+                // return to list
+                bookmarks.current_sub_state = 0; /*list*/
+                bookmarks.updateBookmarks();     // Force update bookmarks to make popup disappear instantly
+                Serial.println("returned to list");
+            }
         }
 
         if (btn_right_pressed) {
-            if (bookmarks.selected_item == 0) {
-                gps_map.setCourse(0); // Remove current course
-                Serial.println("Deleted course");
-            } else {
-                // show info
+            // Button press actions per sub state
+            if (bookmarks.current_sub_state == 0 /*list state*/) {
+                if (bookmarks.returnSelectedItem() == 0) {
+                    gps_map.setCourse(0); // Remove current course
+                    Serial.println("Deleted course");
+                } else {
+                    // Go to show info panel state
+                }
             }
         }
 
         if (btn_right_long_pressed) {
-            if (bookmarks.selected_item != 0) {
-                // To do: display warning popup
-                // Delete that bookmark
-                gps_storage.deleteBookmark(bookmarks.selected_item);
+            // Button press actions per sub state
+            if (bookmarks.current_sub_state == 0 /*list state*/) {
+
+                if (bookmarks.returnSelectedItem() != 0) {
+                    // Show warning popup if in the list state
+                    bookmarks.current_sub_state = 1; /*warning popup state*/
+                }
+
+            } else if (bookmarks.current_sub_state == 1 /*warning popup state*/) {
+
+                // Delete GPS if in the popup state
+                gps_storage.deleteBookmark(bookmarks.returnSelectedItem());
+                bookmarks.current_sub_state = 0; // Return to list substate
+                bookmarks.updateBookmarks();     // Force update bookmarks to make popup disappear instantly
             }
         }
 

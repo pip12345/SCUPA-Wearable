@@ -45,18 +45,16 @@ void DrawMap::updateMap() {
 
     // TO DO: ADD FUNCTION HERE THAT GETS THE LATEST COMPASS ANGLE FROM MAGNETOMETER
     // TO DO: ADD FUNCTION THAT SETS THE COURSE
-    drawCourse();    // update course to the set course_id
+    drawCourse();                 // update course to the set course_id
     updateCompass(compass_angle); // Update compass
 }
 
-void DrawMap::setCourse(int course_storage_id)
-{
+void DrawMap::setCourse(int course_storage_id) {
     if (course_storage_id >= 0 && course_storage_id < GPS_STORAGE_SLOTS)
         course_id = course_storage_id;
 }
 
-int DrawMap::returnCourse()
-{
+int DrawMap::returnCourse() {
     return course_id;
 }
 
@@ -159,9 +157,8 @@ void DrawMap::updateCompass(float angle) {
 }
 
 // Updates course pointer to set id of a stored GPS coordinate
-// Set to 0 to remove set course
 void DrawMap::drawCourse() {
-    if (course_id != 0) {
+    if (course_id != 0) { // If course ID is not the user
         ScreenCoordinates screen_coords = convertGPSToScreenCoords(gps_storage.returnUser(), gps_storage.returnBookmark(course_id), pixels_per_meter);
         // Draw course line
         tft.drawLine(TFT_CENTER_X, TFT_CENTER_Y, screen_coords.x, screen_coords.y, ST77XX_CYAN);
@@ -280,8 +277,13 @@ void DrawMenu::downMenu() {
     }
 }
 
+int DrawMenu::returnSelectedItem() {
+    return selected_item;
+}
+
 DrawBookmarks::DrawBookmarks() {
     selected_item = 1;
+    current_sub_state = 0; // starting state is list
 }
 
 // Update and redraw bookmarks after a time of UPDATE_INTERVAL has passed
@@ -289,7 +291,20 @@ void DrawBookmarks::loopBookmarks() {
     current_time = millis();
     if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
         previous_time = current_time;
-        updateBookmarks();
+
+        // State machine for handling different subwindows within the bookmarks menu
+        switch (current_sub_state) {
+        case 0:
+            updateBookmarks();
+            break;
+        case 1:
+            updateWarningPopUp();
+            break;
+        case 2:
+            break;
+        default:
+            break;
+        }
     }
 }
 
@@ -299,7 +314,7 @@ void DrawBookmarks::updateBookmarks() {
 
     // Draw block for currently selected menu item
     // Always resets back to the first location when going to the next page
-    tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + ((MENU_SPACING * selected_item) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)), 315, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
+    tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + ((MENU_SPACING * selected_item) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)), 310, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
 
     // Draw Text
     tft.setTextWrap(false); // Disable text wrap because it may screw with the element positioning in the menu
@@ -327,6 +342,29 @@ void DrawBookmarks::updateBookmarks() {
     }
     tft.setTextWrap(true);
     tft.setTextSize(1);
+}
+
+void DrawBookmarks::updateWarningPopUp() {
+    // Don't clear screen on purpose, we want to still see what is in the background
+
+    // Draw textbox in the center of the screen
+    // Hardcoded because I'm lazy
+    tft.fillRoundRect(POPUP_SIZE, POPUP_SIZE, TFT_X - 2 * POPUP_SIZE, TFT_Y - 2 * POPUP_SIZE, 10, ST77XX_RED);
+    tft.setTextWrap(true);
+    tft.setTextSize(2);
+    tft.setTextColor(ST77XX_YELLOW);
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 20);
+    tft.println("Delete bookmark");
+    tft.setTextSize(1);
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 50);
+    tft.println("Are you sure you wish to delete");
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 60);
+    tft.println("         this bookmark?");
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 100);
+    tft.println("Long press right to delete");
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 120);
+    tft.println("Press left once to go back");
 }
 
 // Scroll one item up in the bookmark menu
@@ -359,7 +397,7 @@ void DrawBookmarks::downMenu() {
         We do that because there are 11 unique elements per page since the last
         element always gets redrawn at the top of the next page. */
 
-        current_page = (float)(int)(selected_item + 0.5) / 11; // use datatype rounding down trick
+        current_page = (int)(selected_item + 0.5) / 11; // use datatype rounding down trick
         Serial.print("selected_item: ");
         Serial.println(selected_item);
         Serial.print("current_page: ");
@@ -367,4 +405,8 @@ void DrawBookmarks::downMenu() {
 
         updateBookmarks();
     }
+}
+
+int DrawBookmarks::returnSelectedItem() {
+    return selected_item;
 }
