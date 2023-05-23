@@ -130,11 +130,13 @@ void loop() {
         bookmarks.loopBookmarks();
 
         if (btn_up_pressed) {
-            bookmarks.upMenu();
+            if (bookmarks.current_sub_state != bookmarks.Substate::warning_popup) // Don't allow scrolling up or down while in the deletion prompt
+                bookmarks.upMenu();
         }
 
         if (btn_down_pressed) {
-            bookmarks.downMenu();
+            if (bookmarks.current_sub_state != bookmarks.Substate::warning_popup) // Don't allow scrolling up or down while in the deletion prompt
+                bookmarks.downMenu();
         }
 
         if (btn_left_pressed) {
@@ -148,8 +150,12 @@ void loop() {
                 bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
             } else if (bookmarks.current_sub_state == bookmarks.Substate::info_popup) {
                 // return to list
-                bookmarks.current_sub_state = bookmarks.Substate::list; /*list*/
-                bookmarks.updateBookmarks();                            // Force update bookmarks to make popup disappear instantly
+                bookmarks.current_sub_state = bookmarks.Substate::list;
+                bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
+            } else if (bookmarks.current_sub_state = bookmarks.Substate::add_bookmark) {
+                // return to list
+                bookmarks.current_sub_state = bookmarks.Substate::list;
+                bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
             }
         }
 
@@ -160,12 +166,25 @@ void loop() {
                     gps_map.setCourse(0); // Remove current course
                     Serial.println("Deleted course");
                 } else {
-                    // Go to show info panel state
-                    bookmarks.current_sub_state = bookmarks.Substate::info_popup;
+                    if ((gps_storage.returnBookmark(bookmarks.returnSelectedItem()).latitude != 404) && (gps_storage.returnBookmark(bookmarks.returnSelectedItem()).longitude != 404)) {
+                        // If right pressed on an existing entry, open info popup
+                        bookmarks.current_sub_state = bookmarks.Substate::info_popup;
+                        bookmarks.updateInfoPanel(); /// Force update to show instantly
+                    } else {
+                        // If right pressed on a non-existing entry, open add bookmark menu
+                        bookmarks.current_sub_state = bookmarks.Substate::add_bookmark;
+                        bookmarks.updateAddNewBookmarkMenu(); // Force update to show instantly
+                    }
                 }
             } else if (bookmarks.current_sub_state == bookmarks.Substate::info_popup) {
                 // Set course to the selected item if confirmed in the info panel
                 gps_map.setCourse(bookmarks.returnSelectedItem());
+
+                // return to list
+                bookmarks.current_sub_state = bookmarks.Substate::list;
+                bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
+            } else if (bookmarks.current_sub_state == bookmarks.Substate::add_bookmark) {
+                bookmarks.bookmarkCurrentLocation();
 
                 // return to list
                 bookmarks.current_sub_state = bookmarks.Substate::list;
@@ -180,6 +199,7 @@ void loop() {
                 if (bookmarks.returnSelectedItem() != 0) {
                     // Show warning popup if in the list state
                     bookmarks.current_sub_state = bookmarks.Substate::warning_popup;
+                    bookmarks.updateWarningPopUp(); // Force update to show instantly
                 }
 
             } else if (bookmarks.current_sub_state == bookmarks.Substate::warning_popup) {
@@ -207,7 +227,6 @@ void loop() {
         Serial.println("emergency message selected");
         current_state = main_menu;
         break;
-
     default:
         current_state = map_display;
     }

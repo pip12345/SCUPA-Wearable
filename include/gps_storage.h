@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 #define GPS_STORAGE_SLOTS 64
+#define GPS_DESCRIPTION_STRINGS 12
 
 struct GpsCoordinates {
     float latitude{};     // Latitude example: 12.195722 (N) - y axis, 404 is uninitialized
@@ -19,6 +20,7 @@ struct GpsCoordinates {
 // Stores GPS coordinates in an array with a specific id, id 0 is reserved for the user itself. Bookmark ids go from 1 to GPS_STORAGE_SLOTS (default 64)
 class GpsStorage {
   public:
+    GpsStorage();
     void addBookmark(GpsCoordinates location, int slot); // bookmark location to slot 1 to GPS_STORAGE_SLOTS (default 64)
     void addBookmark(double latitude, double longitude, float depth, String description, int slot);
     void addBookmark(double latitude, double longitude, float depth, int slot);
@@ -29,6 +31,8 @@ class GpsStorage {
     void setUser(double latitude, double longitude, float depth); // Set user coordinates
     GpsCoordinates returnUser();                                  // Return user coordinates
 
+    String descriptions[GPS_DESCRIPTION_STRINGS]{}; // Holds preprogrammed descriptions. Stretch goal: read this from SD card instead?
+    
   private:
     GpsCoordinates arr[GPS_STORAGE_SLOTS]{}; // Holds bookmarked GPS coordinates
 };

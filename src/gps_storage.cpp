@@ -20,6 +20,22 @@ GpsCoordinates::GpsCoordinates(double latitude, double longitude, float depth) {
     this->depth = depth;
 }
 
+GpsStorage::GpsStorage() {
+    // Preprogrammed for now
+    descriptions[0] = "Starting Location";
+    descriptions[1] = "Boat";
+    descriptions[2] = "Rendezvous Point";
+    descriptions[3] = "Sea Horses";
+    descriptions[4] = "Coral";
+    descriptions[5] = "Shipwreck";
+    descriptions[6] = "Rock Formation";
+    descriptions[7] = "Cavern";
+    descriptions[8] = "Interest 1";
+    descriptions[9] = "Interest 2";
+    descriptions[10] = "Interest 3";
+    descriptions[11] = "Interest 4";
+}
+
 void GpsStorage::addBookmark(GpsCoordinates location, int slot) {
     if (slot >= 1 && slot < GPS_STORAGE_SLOTS)
         arr[slot] = location;

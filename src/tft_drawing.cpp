@@ -305,6 +305,12 @@ void DrawBookmarks::loopBookmarks() {
         case info_popup:
             updateInfoPanel();
             break;
+        case add_bookmark:
+            updateAddNewBookmarkMenu();
+            Serial.print("selected_item: ");
+            Serial.println(selected_item);
+            Serial.print("selected_description: ");
+            Serial.println(selected_description);
         default:
             break;
         }
@@ -362,7 +368,7 @@ void DrawBookmarks::updateWarningPopUp() {
     tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 50);
     tft.println("Are you sure you wish to delete");
     tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 60);
-    tft.println("         this bookmark?");
+    tft.println("        this bookmark?");
     tft.setTextColor(ST77XX_WHITE);
     tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 100);
     tft.println("LONG PRESS RIGHT to confirm");
@@ -394,63 +400,127 @@ void DrawBookmarks::updateInfoPanel() {
     tft.print(" E");
 
     tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 50);
+    tft.print("Depth: ");
+    tft.print(gps_storage.returnBookmark(selected_item).depth);
+    tft.print(" m");
+
+    tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 60);
     tft.print("Distance: ");
     tft.print(distGPStoUser(gps_storage, selected_item));
     tft.print(" m");
 
-    tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 70);
-    tft.print("Description: ");
     tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 80);
+    tft.print("Description: ");
+    tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 90);
     tft.print(gps_storage.returnBookmark(selected_item).description);
     tft.setTextColor(ST77XX_WHITE);
 
     tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 130);
     tft.print("Press RIGHT to set course ");
     tft.setCursor(INFO_SIZE + 20, INFO_SIZE + 140);
-    tft.print("Press LEFT to go back");
+    tft.print("Press LEFT to close");
 
     tft.setTextColor(ST77XX_WHITE);
     // tft.print("Description: ");
     // tft.print(gps_storage.returnBookmark(selected_item).description);
 }
 
+// Draw menu to add bookmark to currently selected_item
+void DrawBookmarks::updateAddNewBookmarkMenu() {
+    // Show menu with preprogrammed strings
+    tft.fillScreen(BACKGROUND_COLOR); // Clear screen
+
+    // Draw block for currently selected menu item
+    // Always resets back to the first location when going to the next page
+    tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + (MENU_SPACING * selected_description), 310, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
+
+    // Draw Text
+    tft.setTextWrap(false); // Disable text wrap because it may screw with the element positioning in the menu
+    tft.setTextColor(ST77XX_ORANGE);
+    tft.setTextSize(1);
+    tft.setCursor(12, 0);
+    tft.print("-=-=- New Bookmark: Select a description -=-=-");
+    tft.setTextColor(ST77XX_WHITE);
+
+    tft.setTextSize(2); // 12*16
+
+    for (int i = 0; i <= MAX_MENU_ITEMS; i++) {
+        // Draw the preprogrammed strings
+        tft.setCursor(12, 20 + (MENU_SPACING * i));
+        tft.print(gps_storage.descriptions[i]);
+        // tft.print(" - ");
+        // tft.println(gps_storage.returnBookmark(i).description);
+    }
+
+    tft.setTextSize(1); // 12*16
+}
+
+// Bookmark current position to the selected_item chosen in addNewBookmarkMenu() using selected_description
+void DrawBookmarks::bookmarkCurrentLocation() {
+    gps_storage.addBookmark(gps_storage.returnUser().latitude, gps_storage.returnUser().longitude, gps_storage.returnUser().depth, gps_storage.descriptions[selected_description], selected_item);
+}
+
 // Scroll one item up in the bookmark menu
 void DrawBookmarks::upMenu() {
-    if (selected_item > 0 && selected_item < GPS_STORAGE_SLOTS) {
-        selected_item -= 1;
+    if (current_sub_state == add_bookmark) {
+        // In this case we're working with selected_description instead of selected_item
+        // since we don't want to change the selected item in the main list while scrolling descriptions
+        if (selected_description > 0 && selected_description < MAX_MENU_ITEMS) {
+            selected_description -= 1;
+            Serial.print("selected_description: ");
+            Serial.println(selected_description);
 
-        /* We can calculate the current page by rounding down
-        selected_item, then dividing it by 11.
-        We do that because there are 11 unique elements per page since the last
-        element always gets redrawn at the top of the next page. */
+            updateAddNewBookmarkMenu();
+        }
+    } else {
+        if (selected_item > 0 && selected_item < GPS_STORAGE_SLOTS) {
+            selected_item -= 1;
 
-        current_page = (float)(int)(selected_item + 0.5) / 11; // use datatype rounding down trick
-        Serial.print("selected_item: ");
-        Serial.println(selected_item);
-        Serial.print("current_page: ");
-        Serial.println(current_page);
+            /* We can calculate the current page by rounding down
+            selected_item, then dividing it by 11.
+            We do that because there are 11 unique elements per page since the last
+            element always gets redrawn at the top of the next page. */
 
-        updateBookmarks();
+            current_page = (float)(int)(selected_item + 0.5) / 11; // use datatype rounding down trick
+            Serial.print("selected_item: ");
+            Serial.println(selected_item);
+            Serial.print("current_page: ");
+            Serial.println(current_page);
+
+            updateBookmarks();
+        }
     }
 }
 
 // Scroll one item down in the bookmark menu
 void DrawBookmarks::downMenu() {
-    if (selected_item >= 0 && selected_item < (GPS_STORAGE_SLOTS - 1)) {
-        selected_item += 1;
+    if (current_sub_state == add_bookmark) {
+        // In this case we're working with selected_description instead of selected_item
+        // since we don't want to change the selected item in the main list while scrolling descriptions
+        if (selected_description >= 0 && selected_description < (MAX_MENU_ITEMS - 1)) {
+            selected_description += 1;
+            Serial.print("selected_description: ");
+            Serial.println(selected_description);
 
-        /* We can calculate the current page by rounding down
-        selected_item, then dividing it by 11.
-        We do that because there are 11 unique elements per page since the last
-        element always gets redrawn at the top of the next page. */
+            updateAddNewBookmarkMenu();
+        }
+    } else {
+        if (selected_item >= 0 && selected_item < (GPS_STORAGE_SLOTS - 1)) {
+            selected_item += 1;
 
-        current_page = (int)(selected_item + 0.5) / 11; // use datatype rounding down trick
-        Serial.print("selected_item: ");
-        Serial.println(selected_item);
-        Serial.print("current_page: ");
-        Serial.println(current_page);
+            /* We can calculate the current page by rounding down
+            selected_item, then dividing it by 11.
+            We do that because there are 11 unique elements per page since the last
+            element always gets redrawn at the top of the next page. */
 
-        updateBookmarks();
+            current_page = (int)(selected_item + 0.5) / 11; // use datatype rounding down trick
+            Serial.print("selected_item: ");
+            Serial.println(selected_item);
+            Serial.print("current_page: ");
+            Serial.println(current_page); 
+
+            updateBookmarks();
+        }
     }
 }
 
