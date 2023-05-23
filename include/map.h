@@ -23,7 +23,6 @@ const float DEGREES_PER_RADIAN = 180 / M_PI;
 
 float getCompassSine(float angle);
 float getCompassCosine(float angle);
-void intToCharArray(int value, char *temp);
 
 float distGPSPoints(double lat1, double lon1, double lat2, double lon2);
 float distGPStoUser(GpsStorage storage, int storage_id);

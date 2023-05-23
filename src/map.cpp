@@ -16,18 +16,6 @@ float getCompassCosine(float angle) {
     return getCompassSine(angle - 90);
 }
 
-// Only works from values 0 to 9999, temp must be a char array of at least 5 elements
-// Puts the resulting characters in the char array passed to the function
-void intToCharArray(int value, char *temp) {
-    if (value < 100 && value >= 0) {
-        dtostrf(value, 2, 0, temp);
-    } else if (value >= 100 && value < 1000) {
-        dtostrf(value, 3, 0, temp);
-    } else if (value >= 1000) {
-        dtostrf(value, 4, 0, temp);
-    }
-}
-
 // Returns distance in meters between 2 GPS points
 float distGPSPoints(double lat1, double lon1, double lat2, double lon2) {
     double lat_avg = (lat1 + lat2) / 2;
