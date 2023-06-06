@@ -19,7 +19,7 @@ const int COMPASS_RADIUS = 30; // Radius of the compass being drawn
 //             111,111 * cos(latitude) meters in the W direction is +1 degree (of longitude).
 const float METERS_PER_DEGREE = 1e7 / 90; // m per degree
 const float RADIANS_PER_DEGREE = PI / 180;
-const float DEGREES_PER_RADIAN = 180 / M_PI;
+const float DEGREES_PER_RADIAN = 180 / PI;
 
 float getCompassSine(float angle);
 float getCompassCosine(float angle);
