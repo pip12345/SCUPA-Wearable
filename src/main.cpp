@@ -14,6 +14,7 @@ DrawMap gps_map;
 DrawMenu menu;
 DrawBookmarks bookmarks;
 GpsStorage gps_storage; // stores GPS coordinates that get drawn on the screen
+MessageStorage msg_storage;
 
 Button2 btn_up, btn_down, btn_left, btn_right;
 bool btn_up_pressed{}, btn_down_pressed{}, btn_left_pressed{}, btn_right_pressed{}, btn_right_long_pressed{};
@@ -73,6 +74,14 @@ void setup() {
         gps_storage.addBookmark(10 + i, 10 + i, 0, "Filler", i);
     }
     gps_storage.addBookmark(69, 69, 0, "This was painful", 63);
+    /////// DEBUG //////////
+    msg_storage.addEntry("Cool no coords message", 0);
+    msg_storage.addEntry("Cool no coords emergency", true, 1);
+    msg_storage.addEntry("Cool coords message", gps_storage.returnBookmark(1), 2);
+    msg_storage.addEntry("Cool coords emergency", gps_storage.returnBookmark(2), true, 3);
+    
+    //msg_storage.debugPrintContents();
+    
     /////// DEBUG //////////
 
     Serial.println("Setup finished");

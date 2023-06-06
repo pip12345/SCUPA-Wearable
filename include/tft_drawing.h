@@ -38,6 +38,7 @@ Therefore, all calls to tft must be done in the source file of this header
 
 #include "gps_storage.h"
 #include "map.h"
+#include "messages.h"
 
 #define TFT_MOSI 23 // DIN on waveshare
 #define TFT_SCK 18  // CLK on waveshare

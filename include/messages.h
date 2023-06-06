@@ -14,6 +14,7 @@ struct Message {
 
     Message();
     Message(String text);
+    Message(GpsCoordinates coords);
     Message(String text, GpsCoordinates coords);
     Message(String text, bool emergency);
     Message(String text, GpsCoordinates coords, bool emergency);
@@ -29,18 +30,21 @@ struct MessageEntry {
 };
 
 // Stores messages in an array with a specific id
+// Starts at slot 0
 class MessageStorage {
-    public:
-        void addEntry(Message msg, int slot);
-        void addEntry(String text, int slot);
-        void addEntry(String text, GpsCoordinates coords, int slot);
-        void addEntry(String text, bool emergency, int slot);
-        void addEntry(String text, GpsCoordinates coords, bool emergency, int slot);
-        void deleteEntry(int slot);
+  public:
+    void addEntry(Message msg, int slot);
+    void addEntry(String text, int slot);
+    void addEntry(String text, GpsCoordinates coords, int slot);
+    void addEntry(String text, bool emergency, int slot);
+    void addEntry(String text, GpsCoordinates coords, bool emergency, int slot);
+    void deleteEntry(int slot);
 
-        Message returnEntry(int slot);
-        bool returnIfEmpty(int slot);
+    void debugPrintContents(); // print contents of entire array;
 
-    private:
-        MessageEntry arr[MESSAGE_STORAGE_SLOTS]{}; // Array of MessageEntry's that holds all saved messages
+    Message returnEntry(int slot);
+    bool returnIfEmpty(int slot);
+
+  private:
+    MessageEntry arr[MESSAGE_STORAGE_SLOTS]{}; // Array of MessageEntry's that holds all saved messages
 };
