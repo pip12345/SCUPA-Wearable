@@ -37,6 +37,36 @@ MessageEntry::MessageEntry(Message msg) {
     this->msg = msg;
 }
 
+MessageStorage::MessageStorage()
+{
+    // Message descriptions, preprogrammed for now
+    message_descriptions[0] = "Ok.";
+    message_descriptions[1] = "Yes.";
+    message_descriptions[2] = "No.";
+    message_descriptions[3] = "Not sure.";
+    message_descriptions[4] = "Maybe.";
+    message_descriptions[5] = "Check this out.";
+    message_descriptions[6] = "Come here.";
+    message_descriptions[7] = "Closer.";
+    message_descriptions[8] = "Farther.";
+    message_descriptions[9] = "Returning soon.";
+    message_descriptions[10] = "Surfaced.";
+    message_descriptions[11] = "Underwater.";
+
+    emergency_descriptions[0] = "Help!";
+    emergency_descriptions[1] = "Partner in trouble!";
+    emergency_descriptions[2] = "Not feeling well!";
+    emergency_descriptions[3] = "Stuck!";
+    emergency_descriptions[4] = "Oxygen low!";
+    emergency_descriptions[5] = "Lost!";
+    emergency_descriptions[6] = "Hurt!";
+    emergency_descriptions[7] = "Equipment malfunction!";
+    emergency_descriptions[8] = "Dangerous animal!";
+    emergency_descriptions[9] = "Where are you?";
+    emergency_descriptions[10] = "Cold!";
+    emergency_descriptions[11] = "Sea horses in danger!";
+}
+
 void MessageStorage::addEntry(Message msg, int slot) {
     if (slot < MESSAGE_STORAGE_SLOTS && slot >= 0) {
         arr[slot].msg = msg;
