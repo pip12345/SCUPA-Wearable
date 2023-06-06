@@ -1,6 +1,7 @@
 #include "tft_drawing.h"
 
-extern GpsStorage gps_storage; // Requires gps_storage to be declared elsewhere
+extern GpsStorage gps_storage;     // Requires gps_storage to be declared in main
+extern MessageStorage msg_storage; // Requires msg_storage to be declared in main
 
 // Inits tft in this cpp file on creation of the drawcontroller, use this for all global stuff
 // tft commands such as tft.drawPixel ONLY WORK inside this .cpp file
@@ -149,7 +150,7 @@ void DrawMap::drawCourse() {
             tft.println(course_id);
             tft.print("Distance: ");
             tft.print(distGPStoUser(gps_storage, course_id));
-            tft.print (" m");
+            tft.print(" m");
 
             // Print depth info underneath selected dot
             tft.setTextColor(ST77XX_BLUE);
@@ -518,7 +519,7 @@ void DrawBookmarks::downMenu() {
             Serial.print("selected_item: ");
             Serial.println(selected_item);
             Serial.print("current_page: ");
-            Serial.println(current_page); 
+            Serial.println(current_page);
 
             updateBookmarks();
         }
@@ -527,4 +528,143 @@ void DrawBookmarks::downMenu() {
 
 int DrawBookmarks::returnSelectedItem() {
     return selected_item;
+}
+
+void DrawCheckMessages::loopCheckMessages() {
+    current_time = millis();
+    if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
+        previous_time = current_time;
+
+        // State machine for handling different subwindows within the bookmarks menu
+        switch (current_sub_state) {
+        case list:
+            updateCheckMessages();
+            break;
+        case warning_popup:
+            //updateWarningPopUp();
+            break;
+        case info_popup:
+            //updateInfoPanel();
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+void DrawCheckMessages::updateCheckMessages() {
+    tft.fillScreen(BACKGROUND_COLOR); // Clear screen
+
+    // Draw block for currently selected menu item
+    // Always resets back to the first location when going to the next page
+    tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + ((MENU_SPACING * selected_item) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)), 310, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
+
+    // Draw Text
+    tft.setTextWrap(false); // Disable text wrap because it may screw with the element positioning in the menu
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setTextSize(2); // 12*16
+
+    for (int i = current_page * MAX_MENU_ITEMS; i <= (current_page * MAX_MENU_ITEMS) + MAX_MENU_ITEMS; i++) {
+        if (i < GPS_STORAGE_SLOTS) {
+            // Draw the message for each slot
+            tft.setCursor(0, 20 + ((MENU_SPACING * i) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)));
+            tft.print(i + 1);
+            tft.print(" - ");
+            tft.println(msg_storage.returnEntry(i).text);
+        }
+    }
+    tft.setTextWrap(true);
+    tft.setTextSize(1);
+}
+
+void DrawCheckMessages::updateWarningPopUp()
+{
+    // TO DO
+}
+
+void DrawCheckMessages::updateInfoPanel()
+{
+    // TO DO
+}
+
+void DrawCheckMessages::upMenu() {
+    if (selected_item > 0 && selected_item < GPS_STORAGE_SLOTS) {
+        selected_item -= 1;
+
+        /* We can calculate the current page by rounding down
+        selected_item, then dividing it by 11.
+        We do that because there are 11 unique elements per page since the last
+        element always gets redrawn at the top of the next page. */
+
+        current_page = (float)(int)(selected_item + 0.5) / 11; // use datatype rounding down trick
+        Serial.print("selected_item: ");
+        Serial.println(selected_item);
+        Serial.print("current_page: ");
+        Serial.println(current_page);
+
+        updateCheckMessages();
+    }
+}
+
+void DrawCheckMessages::downMenu() {
+    if (selected_item >= 0 && selected_item < (GPS_STORAGE_SLOTS - 1)) {
+        selected_item += 1;
+
+        /* We can calculate the current page by rounding down
+        selected_item, then dividing it by 11.
+        We do that because there are 11 unique elements per page since the last
+        element always gets redrawn at the top of the next page. */
+
+        current_page = (int)(selected_item + 0.5) / 11; // use datatype rounding down trick
+        Serial.print("selected_item: ");
+        Serial.println(selected_item);
+        Serial.print("current_page: ");
+        Serial.println(current_page);
+
+        updateCheckMessages();
+    }
+}
+
+/////////////////////////////////////////////// TO DO /////////////////////////////////////////////////////////
+void DrawSendMessage::loopSendMessage() {
+    current_time = millis();
+    if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
+        previous_time = current_time;
+        updateSendMessage();
+    }
+}
+
+void DrawSendMessage::updateSendMessage() {
+    tft.fillScreen(BACKGROUND_COLOR); // Clear screen
+
+    // Draw block for currently selected menu item
+    // Always resets back to the first location when going to the next page
+    tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + (MENU_SPACING * selected_item), 310, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
+
+    // Draw Text
+    tft.setTextWrap(false); // Disable text wrap because it may screw with the element positioning in the menu
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setTextSize(2); // 12*16
+
+    for (int i = 0; i <= MAX_MENU_ITEMS; i++) {
+        if (i < GPS_STORAGE_SLOTS) {
+            tft.setCursor(0, 20 + (MENU_SPACING * i));
+            tft.print("SEND ");
+            tft.print(" - ");
+            tft.println(msg_storage.message_descriptions[i]);
+        }
+    }
+    tft.setTextWrap(true);
+    tft.setTextSize(1);
+}
+
+void DrawSendEmergency::loopSendEmergency() {
+    current_time = millis();
+    if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
+        previous_time = current_time;
+        updateSendEmergency();
+    }
+}
+
+void DrawSendEmergency::updateSendEmergency() {
 }

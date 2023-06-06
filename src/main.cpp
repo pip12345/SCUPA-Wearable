@@ -13,6 +13,10 @@ DrawController screen;
 DrawMap gps_map;
 DrawMenu menu;
 DrawBookmarks bookmarks;
+DrawCheckMessages messages_check;
+DrawSendMessage messages_send;
+DrawSendEmergency messages_emergency_send;
+
 GpsStorage gps_storage; // stores GPS coordinates that get drawn on the screen
 MessageStorage msg_storage;
 
@@ -79,9 +83,9 @@ void setup() {
     msg_storage.addEntry("Cool no coords emergency", true, 1);
     msg_storage.addEntry("Cool coords message", gps_storage.returnBookmark(1), 2);
     msg_storage.addEntry("Cool coords emergency", gps_storage.returnBookmark(2), true, 3);
-    
-    //msg_storage.debugPrintContents();
-    
+
+    // msg_storage.debugPrintContents();
+
     /////// DEBUG //////////
 
     Serial.println("Setup finished");
@@ -227,19 +231,61 @@ void loop() {
 
         break;
     case check_messages:
-        // code here
-        Serial.println("check messages selected");
-        current_state = main_menu;
+        messages_check.loopCheckMessages();
+
+        if (btn_up_pressed) {
+            if (messages_check.current_sub_state != messages_check.Substate::warning_popup) // Don't allow scrolling up or down while in the deletion prompt
+                messages_check.upMenu();
+        }
+
+        if (btn_down_pressed) {
+            if (messages_check.current_sub_state != messages_check.Substate::warning_popup) // Don't allow scrolling up or down while in the deletion prompt
+                messages_check.downMenu();
+        }
+
+        if (btn_left_pressed) {
+            // return to main menu
+            current_state = main_menu;
+        }
+
+        if (btn_right_pressed) {
+        }
         break;
     case send_message:
-        // code here
-        Serial.println("send message selected");
-        current_state = main_menu;
+        messages_send.loopSendMessage();
+
+        if (btn_up_pressed) {
+
+        }
+
+        if (btn_down_pressed) {
+
+        }
+
+        if (btn_left_pressed) {
+            // return to main menu
+            current_state = main_menu;
+        }
+
+        if (btn_right_pressed) {
+        }
         break;
     case send_emergency:
-        // code here
-        Serial.println("emergency message selected");
-        current_state = main_menu;
+        messages_emergency_send.loopSendEmergency();
+
+        if (btn_up_pressed) {
+        }
+
+        if (btn_down_pressed) {
+        }
+
+        if (btn_left_pressed) {
+            // return to main menu
+            current_state = main_menu;
+        }
+
+        if (btn_right_pressed) {
+        }
         break;
     default:
         current_state = map_display;

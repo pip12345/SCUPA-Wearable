@@ -159,3 +159,80 @@ class DrawBookmarks {
     int previous_time{};
     const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
 };
+
+class DrawCheckMessages {
+  public:
+    void loopCheckMessages();
+
+    void updateCheckMessages();
+    void updateWarningPopUp();
+    void updateInfoPanel();
+
+    void upMenu();
+    void downMenu();
+
+    int returnSelectedItem();
+
+    enum Substate { list,
+                    warning_popup, // Main bookmark list
+                    info_popup };  // Info popup showing detailed information
+
+    Substate current_sub_state{};
+
+  private:
+    const int MENU_SPACING = 18;
+    const int MAX_MENU_ITEMS = 11; // show x+1 items at once (11 is 12 being shown)
+    const int ITEM_BORDER_SIZE = 2;
+    const int INFO_SIZE = 40;
+
+    int selected_item{};        // Currently selected menu item in the menu
+    int selected_description{}; // Currently selected description item in the add new bookmark menu
+    int current_page{};         // current page of MAX_MENU_ITEMS bookmarks being displayed on the menu, first page = 0
+
+    int current_time{}; // Used for time-based actions
+    int previous_time{};
+    const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
+};
+
+//// TO IMPLEMENT BELOW ////
+
+class DrawSendMessage {
+  public:
+    void loopSendMessage();
+    void updateSendMessage();
+
+    void upMenu();
+    void downMenu();
+
+    int returnSelectedItem();
+
+  private:
+    const int MENU_SPACING = 18;
+    const int MAX_MENU_ITEMS = 11; // show x+1 items at once (11 is 12 being shown)
+    const int ITEM_BORDER_SIZE = 2;
+    const int INFO_SIZE = 40;
+
+    int selected_item{}; // Currently selected menu item in the menu
+
+    int current_time{}; // Used for time-based actions
+    int previous_time{};
+    const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
+};
+
+class DrawSendEmergency {
+  public:
+    void loopSendEmergency();
+    void updateSendEmergency();
+
+    void upMenu();
+    void downMenu();
+
+    int returnSelectedItem();
+
+  private:
+    int selected_item{}; // Currently selected menu item in the menu
+
+    int current_time{}; // Used for time-based actions
+    int previous_time{};
+    const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
+};
