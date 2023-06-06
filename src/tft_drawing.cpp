@@ -149,6 +149,7 @@ void DrawMap::drawCourse() {
             tft.println(course_id);
             tft.print("Distance: ");
             tft.print(distGPStoUser(gps_storage, course_id));
+            tft.print (" m");
 
             // Print depth info underneath selected dot
             tft.setTextColor(ST77XX_BLUE);

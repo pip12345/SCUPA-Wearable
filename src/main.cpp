@@ -7,7 +7,7 @@
 #define UP_PIN 33
 #define DOWN_PIN 25
 #define LEFT_PIN 26
-#define RIGHT_PIN 13
+#define RIGHT_PIN 19
 
 DrawController screen;
 DrawMap gps_map;
@@ -94,6 +94,11 @@ void loop() {
 
         if (btn_down_pressed) {
             menu.downMenu();
+        }
+
+        if (btn_left_pressed) {
+            // quick return to map
+            current_state = map_display;
         }
 
         if (btn_right_pressed) {
