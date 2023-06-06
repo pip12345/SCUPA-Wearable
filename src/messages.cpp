@@ -39,7 +39,7 @@ MessageEntry::MessageEntry(Message msg) {
 
 MessageStorage::MessageStorage()
 {
-    // Message descriptions, preprogrammed for now
+    // Message descriptions, preprogrammed for now.
     message_descriptions[0] = "Ok.";
     message_descriptions[1] = "Yes.";
     message_descriptions[2] = "No.";

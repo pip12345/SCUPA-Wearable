@@ -5,6 +5,8 @@
 // All non-drawing message related code
 
 #define MESSAGE_STORAGE_SLOTS 64
+#define MESSAGE_DESCRIPTION_SLOTS 12
+#define EMERGENCY_DESCRIPTION_SLOTS 12
 
 // Single instance of a message with text, coordinates and an emergency flag
 struct Message {
@@ -33,6 +35,7 @@ struct MessageEntry {
 // Starts at slot 0
 class MessageStorage {
   public:
+    MessageStorage();
     void addEntry(Message msg, int slot);
     void addEntry(String text, int slot);
     void addEntry(String text, GpsCoordinates coords, int slot);
@@ -40,11 +43,14 @@ class MessageStorage {
     void addEntry(String text, GpsCoordinates coords, bool emergency, int slot);
     void deleteEntry(int slot);
 
-    void debugPrintContents(); // print contents of entire array;
-
     Message returnEntry(int slot);
     bool returnIfEmpty(int slot);
 
+    void debugPrintContents(); // print contents of entire array;
+
+    String message_descriptions[MESSAGE_DESCRIPTION_SLOTS]{};
+    String emergency_descriptions[EMERGENCY_DESCRIPTION_SLOTS]{};
+    
   private:
     MessageEntry arr[MESSAGE_STORAGE_SLOTS]{}; // Array of MessageEntry's that holds all saved messages
 };
