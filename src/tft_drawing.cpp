@@ -353,6 +353,12 @@ void DrawBookmarks::updateBookmarks() {
     }
     tft.setTextWrap(true);
     tft.setTextSize(1);
+
+    // Top of screen info that shows currently entered menu option
+    tft.setCursor(0, 0);
+    tft.setTextColor(ST77XX_BLUE);
+    tft.println("BOOKMARKS");
+    tft.setTextColor(ST77XX_WHITE);
 }
 
 void DrawBookmarks::updateWarningPopUp() {
@@ -575,6 +581,12 @@ void DrawCheckMessages::updateCheckMessages() {
     }
     tft.setTextWrap(true);
     tft.setTextSize(1);
+
+    // Top of screen info that shows currently entered menu option
+    tft.setCursor(0, 0);
+    tft.setTextColor(ST77XX_BLUE);
+    tft.println("CHECK MESSAGES");
+    tft.setTextColor(ST77XX_WHITE);
 }
 
 void DrawCheckMessages::updateWarningPopUp() {
@@ -606,14 +618,14 @@ void DrawCheckMessages::updateInfoPanel() {
     tft.setTextSize(2);
     tft.setTextColor(ST77XX_WHITE);
 
-    tft.setCursor(0,50);
+    tft.setCursor(0, 20);
     tft.println(msg_storage.returnEntry(selected_item).text);
     tft.setTextSize(1);
 
-    // Print info
-    tft.setCursor(0,0);
-    tft.setTextColor(ST77XX_ORANGE);
-    tft.println("SHOWING MESSAGE INFO");
+    // Top of screen info that shows currently entered menu option
+    tft.setCursor(0, 0);
+    tft.setTextColor(ST77XX_BLUE);
+    tft.println("CHECK MESSAGES - MESSAGE INFO");
     tft.setTextColor(ST77XX_WHITE);
 }
 
@@ -655,8 +667,7 @@ void DrawCheckMessages::downMenu() {
     }
 }
 
-int DrawCheckMessages::returnSelectedItem()
-{
+int DrawCheckMessages::returnSelectedItem() {
     return selected_item;
 }
 
@@ -691,6 +702,12 @@ void DrawSendMessage::updateSendMessage() {
     }
     tft.setTextWrap(true);
     tft.setTextSize(1);
+
+    // Top of screen info that shows currently entered menu option
+    tft.setCursor(0, 0);
+    tft.setTextColor(ST77XX_BLUE);
+    tft.println("SEND MESSAGE");
+    tft.setTextColor(ST77XX_WHITE);
 }
 
 void DrawSendEmergency::loopSendEmergency() {

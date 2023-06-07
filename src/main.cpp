@@ -81,11 +81,6 @@ void setup() {
     /////// DEBUG //////////
     msg_storage.addEntry("Cool no coords message", 0);
     msg_storage.addEntry("Cool no coords emergency", true, 1);
-    msg_storage.addEntry("Cool coords message", gps_storage.returnBookmark(1), 2);
-    msg_storage.addEntry("Cool coords emergency", gps_storage.returnBookmark(2), true, 3);
-
-    // msg_storage.debugPrintContents();
-
     /////// DEBUG //////////
 
     Serial.println("Setup finished");

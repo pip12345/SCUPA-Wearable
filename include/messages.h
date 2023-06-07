@@ -16,39 +16,39 @@
  * 
  *****************************************************************************************************************************/
 
-// Single instance of a message with text, coordinates and an emergency flag
+// Single instance of a message with text and an emergency flag
 struct Message {
     String text{};
-    GpsCoordinates coords{};
+    // GpsCoordinates coords{};
     bool emergency{};
 
     Message();
     Message(String text);
-    Message(GpsCoordinates coords);
-    Message(String text, GpsCoordinates coords);
+    // Message(GpsCoordinates coords);
+    // Message(String text, GpsCoordinates coords);
     Message(String text, bool emergency);
-    Message(String text, GpsCoordinates coords, bool emergency);
+    // Message(String text, GpsCoordinates coords, bool emergency);
 };
 
 // Message entry in the storage, indicates if the entry is empty or not
 struct MessageEntry {
     Message msg{};
-    bool empty{true};
+    bool empty{true}; // used to indicate if a spot in the array is fully empty
 
     MessageEntry();
     MessageEntry(Message msg);
 };
 
-// Stores messages in an array with a specific id
+// Stores (text) messages in an array with a specific id
 // Starts at slot 0
 class MessageStorage {
   public:
     MessageStorage();
     void addEntry(Message msg, int slot);
     void addEntry(String text, int slot);
-    void addEntry(String text, GpsCoordinates coords, int slot);
+    // void addEntry(String text, GpsCoordinates coords, int slot);
     void addEntry(String text, bool emergency, int slot);
-    void addEntry(String text, GpsCoordinates coords, bool emergency, int slot);
+    // void addEntry(String text, GpsCoordinates coords, bool emergency, int slot);
     void deleteEntry(int slot);
 
     Message returnEntry(int slot);
