@@ -219,11 +219,9 @@ void loop() {
                     bookmarks.current_sub_state = bookmarks.Substate::warning_popup;
                     bookmarks.updateWarningPopUp(); // Force update to show instantly
                 }
-
+            // If long pressed again while in the warning popup state
             } else if (bookmarks.current_sub_state == bookmarks.Substate::warning_popup) {
-
-                // Delete GPS if in the popup state
-                gps_storage.deleteBookmark(bookmarks.returnSelectedItem());
+                gps_storage.deleteBookmark(bookmarks.returnSelectedItem()); // Delete GPS if in the popup state
                 bookmarks.current_sub_state = bookmarks.Substate::list;
                 bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
             }
@@ -244,22 +242,51 @@ void loop() {
         }
 
         if (btn_left_pressed) {
-            // return to main menu
-            current_state = main_menu;
+            // Button press actions per sub state
+            if (messages_check.current_sub_state == messages_check.Substate::list) {
+                // return to main menu
+                current_state = main_menu;
+            } else if (messages_check.current_sub_state == messages_check.Substate::warning_popup) {
+                // return to list
+                messages_check.current_sub_state = messages_check.Substate::list;
+                messages_check.updateCheckMessages(); // Force update to make popup disappear instantly
+            } else if (messages_check.current_sub_state == messages_check.Substate::info_popup) {
+                // return to list
+                messages_check.current_sub_state = messages_check.Substate::list;
+                messages_check.updateCheckMessages(); // Force update to make popup disappear instantly
+            }
         }
 
         if (btn_right_pressed) {
+            messages_check.current_sub_state = messages_check.Substate::info_popup;
+            messages_check.updateInfoPanel(); /// Force update to show instantly
         }
+
+        if (btn_right_long_pressed) {
+            // Button press actions per sub state
+            if (messages_check.current_sub_state == messages_check.Substate::list) {
+
+                if (messages_check.returnSelectedItem() != 0) {
+                    // Show warning popup if in the list state
+                    messages_check.current_sub_state = messages_check.Substate::warning_popup;
+                    messages_check.updateWarningPopUp(); // Force update to show instantly
+                }
+            // If long pressed again while in the warning popup state
+            } else if (messages_check.current_sub_state == messages_check.Substate::warning_popup) {
+                msg_storage.deleteEntry(messages_check.returnSelectedItem()); // Delete message if in the popup state
+                messages_check.current_sub_state = messages_check.Substate::list;
+                messages_check.updateCheckMessages(); // Force update to make popup disappear instantly
+            }
+        }
+
         break;
     case send_message:
         messages_send.loopSendMessage();
 
         if (btn_up_pressed) {
-
         }
 
         if (btn_down_pressed) {
-
         }
 
         if (btn_left_pressed) {

@@ -541,10 +541,10 @@ void DrawCheckMessages::loopCheckMessages() {
             updateCheckMessages();
             break;
         case warning_popup:
-            //updateWarningPopUp();
+            // updateWarningPopUp();
             break;
         case info_popup:
-            //updateInfoPanel();
+            // updateInfoPanel();
             break;
         default:
             break;
@@ -557,7 +557,7 @@ void DrawCheckMessages::updateCheckMessages() {
 
     // Draw block for currently selected menu item
     // Always resets back to the first location when going to the next page
-    tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + ((MENU_SPACING * selected_item) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)), 310, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
+    tft.fillRoundRect(0, 18 - ITEM_BORDER_SIZE + ((MENU_SPACING * selected_item) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)), TFT_X, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
 
     // Draw Text
     tft.setTextWrap(false); // Disable text wrap because it may screw with the element positioning in the menu
@@ -577,14 +577,44 @@ void DrawCheckMessages::updateCheckMessages() {
     tft.setTextSize(1);
 }
 
-void DrawCheckMessages::updateWarningPopUp()
-{
-    // TO DO
+void DrawCheckMessages::updateWarningPopUp() {
+    // Don't clear screen on purpose, we want to still see what is in the background
+
+    // Draw textbox in the center of the screen
+    // Hardcoded because I'm lazy
+    tft.fillRoundRect(POPUP_SIZE, POPUP_SIZE, TFT_X - 2 * POPUP_SIZE, TFT_Y - 2 * POPUP_SIZE, 10, ST77XX_RED);
+    tft.setTextWrap(true);
+    tft.setTextSize(2);
+    tft.setTextColor(ST77XX_YELLOW);
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 20);
+    tft.println("Delete Message");
+    tft.setTextSize(1);
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 50);
+    tft.println("Are you sure you wish to delete");
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 60);
+    tft.println("        this message?");
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 100);
+    tft.println("LONG PRESS RIGHT to confirm");
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 120);
+    tft.println("Press LEFT to cancel");
 }
 
-void DrawCheckMessages::updateInfoPanel()
-{
-    // TO DO
+void DrawCheckMessages::updateInfoPanel() {
+    tft.fillScreen(BACKGROUND_COLOR); // Clear screen
+    tft.setTextWrap(true);
+    tft.setTextSize(2);
+    tft.setTextColor(ST77XX_WHITE);
+
+    tft.setCursor(0,50);
+    tft.println(msg_storage.returnEntry(selected_item).text);
+    tft.setTextSize(1);
+
+    // Print info
+    tft.setCursor(0,0);
+    tft.setTextColor(ST77XX_ORANGE);
+    tft.println("SHOWING MESSAGE INFO");
+    tft.setTextColor(ST77XX_WHITE);
 }
 
 void DrawCheckMessages::upMenu() {
@@ -623,6 +653,11 @@ void DrawCheckMessages::downMenu() {
 
         updateCheckMessages();
     }
+}
+
+int DrawCheckMessages::returnSelectedItem()
+{
+    return selected_item;
 }
 
 /////////////////////////////////////////////// TO DO /////////////////////////////////////////////////////////

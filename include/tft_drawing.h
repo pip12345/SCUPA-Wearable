@@ -101,6 +101,7 @@ class DrawMenu {
   public:
     void loopMenu(); // runs updateMenu() every set UPDATE_INTERVAL millsieconds
     void updateMenu();
+    
     void upMenu();
     void downMenu();
 
@@ -123,7 +124,6 @@ class DrawBookmarks {
     DrawBookmarks();
 
     void loopBookmarks(); // runs updateBookmarks() every set UPDATE_INTERVAL millsieconds
-
     void updateBookmarks();
     void updateWarningPopUp();
     void updateInfoPanel();
@@ -163,7 +163,6 @@ class DrawBookmarks {
 class DrawCheckMessages {
   public:
     void loopCheckMessages();
-
     void updateCheckMessages();
     void updateWarningPopUp();
     void updateInfoPanel();
@@ -184,6 +183,7 @@ class DrawCheckMessages {
     const int MAX_MENU_ITEMS = 11; // show x+1 items at once (11 is 12 being shown)
     const int ITEM_BORDER_SIZE = 2;
     const int INFO_SIZE = 40;
+    const int POPUP_SIZE = 50;
 
     int selected_item{};        // Currently selected menu item in the menu
     int selected_description{}; // Currently selected description item in the add new bookmark menu
