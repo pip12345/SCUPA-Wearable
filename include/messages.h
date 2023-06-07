@@ -2,18 +2,18 @@
 
 #include "gps_storage.h"
 
-// All non-drawing message related code
+// All non-drawing text message related code
 
 #define MESSAGE_STORAGE_SLOTS 64
 #define MESSAGE_DESCRIPTION_SLOTS 12
 #define EMERGENCY_DESCRIPTION_SLOTS 12
 
 /*****************************************************************************************************************************
- * 
+ *
  *  TO DO: - Reading and writing the messageEntry arr from and to non-volatile storage
  *         - Logic writing messages to first empty slot in the MessageEntry arr
  *         - Reading preprogrammed message_descriptions array and emergency_descriptions array from non volatile storage
- * 
+ *
  *****************************************************************************************************************************/
 
 // Single instance of a message with text and an emergency flag
@@ -49,16 +49,22 @@ class MessageStorage {
     // void addEntry(String text, GpsCoordinates coords, int slot);
     void addEntry(String text, bool emergency, int slot);
     // void addEntry(String text, GpsCoordinates coords, bool emergency, int slot);
+
+    void addEntryNext(Message msg);
+    void addEntryNext(String text);
+    void addEntryNext(String text, bool emergency);
+
     void deleteEntry(int slot);
+    void deleteAll();
 
     Message returnEntry(int slot);
     bool returnIfEmpty(int slot);
 
     void debugPrintContents(); // print contents of entire array;
 
-    String message_descriptions[MESSAGE_DESCRIPTION_SLOTS]{};
-    String emergency_descriptions[EMERGENCY_DESCRIPTION_SLOTS]{};
-    
+    String message_descriptions[MESSAGE_DESCRIPTION_SLOTS]{};     // Holds preprogrammed descriptions for sending messages
+    String emergency_descriptions[EMERGENCY_DESCRIPTION_SLOTS]{}; // Holds preprogrammed descriptions for sending emergency messages
+
   private:
     MessageEntry arr[MESSAGE_STORAGE_SLOTS]{}; // Array of MessageEntry's that holds all saved messages
 };

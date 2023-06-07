@@ -91,8 +91,8 @@ void DrawMap::updateRingsRadiusText(int range_close, int range_medium) {
 
 // Update the compass direction and draw the compass
 void DrawMap::updateCompass(float angle) {
-    // TEMP: convert angle from compass angle (0 degrees = north) to unit circle angle (0 degrees = E)
-    angle = 360 + (90 - angle);
+    // !!!!!!!!!!!!! PLEASE CHECK BELOW LINE !!!!!!!!!!!!!!
+    angle = 360 + (90 - angle); // TEMP: convert angle from compass angle (0 degrees = north) to unit circle angle (0 degrees = E)
 
     int x_offset{};
     int y_offset{}; // The resulting offsets from the center point
@@ -571,7 +571,7 @@ void DrawCheckMessages::updateCheckMessages() {
     tft.setTextSize(2); // 12*16
 
     for (int i = current_page * MAX_MENU_ITEMS; i <= (current_page * MAX_MENU_ITEMS) + MAX_MENU_ITEMS; i++) {
-        if (i < GPS_STORAGE_SLOTS) {
+        if (i < GPS_STORAGE_SLOTS && !msg_storage.returnIfEmpty(i)) { // only print if not empty
             // Draw the message for each slot
             tft.setCursor(0, 20 + ((MENU_SPACING * i) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)));
             tft.print(i + 1);
@@ -649,7 +649,7 @@ void DrawCheckMessages::upMenu() {
 }
 
 void DrawCheckMessages::downMenu() {
-    if (selected_item >= 0 && selected_item < (GPS_STORAGE_SLOTS - 1)) {
+    if (selected_item >= 0 && selected_item < (GPS_STORAGE_SLOTS - 1) && !msg_storage.returnIfEmpty(selected_item + 1)) { // Avoid going down into an empty slot
         selected_item += 1;
 
         /* We can calculate the current page by rounding down

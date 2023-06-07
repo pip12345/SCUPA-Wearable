@@ -79,8 +79,15 @@ void setup() {
     }
     gps_storage.addBookmark(69, 69, 0, "This was painful", 63);
     /////// DEBUG //////////
-    msg_storage.addEntry("Cool no coords message", 0);
-    msg_storage.addEntry("Cool no coords emergency", true, 1);
+    msg_storage.addEntryNext("Cool message");
+    msg_storage.addEntryNext("Cool emergency", true);
+    msg_storage.addEntryNext("Cool message");
+    msg_storage.addEntryNext("Cool message");
+    msg_storage.addEntryNext("Cool emergency", true);
+    msg_storage.addEntryNext("Cool message");
+    msg_storage.addEntryNext("Cool message");
+    msg_storage.addEntryNext("I am in excruciating pain without any indication if it will stop any time soon, please send help");
+    msg_storage.addEntryNext("Cool last message");
     /////// DEBUG //////////
 
     Serial.println("Setup finished");

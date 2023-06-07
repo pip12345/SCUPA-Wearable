@@ -2,7 +2,7 @@
 
 Message::Message() {
     this->emergency = false;
-    this->text = "No text";
+    this->text = "ERROR NO TEXT IN MESSAGE";
 }
 
 Message::Message(String text) {
@@ -29,7 +29,7 @@ Message::Message(String text, bool emergency) {
 
 // Message::Message(GpsCoordinates coords) {
 //     this->coords = coords;
-//     this->text = "No text";
+//     this->text = "ERROR NO TEXT IN MESSAGE";
 // }
 
 MessageEntry::MessageEntry() {
@@ -39,8 +39,7 @@ MessageEntry::MessageEntry(Message msg) {
     this->msg = msg;
 }
 
-MessageStorage::MessageStorage()
-{
+MessageStorage::MessageStorage() {
     // Message descriptions, preprogrammed for now.
     message_descriptions[0] = "Ok.";
     message_descriptions[1] = "Yes.";
@@ -69,6 +68,7 @@ MessageStorage::MessageStorage()
     emergency_descriptions[11] = "Sea horses in danger!";
 }
 
+// Add entry to the storage at the given slot
 void MessageStorage::addEntry(Message msg, int slot) {
     if (slot < MESSAGE_STORAGE_SLOTS && slot >= 0) {
         arr[slot].msg = msg;
@@ -76,6 +76,7 @@ void MessageStorage::addEntry(Message msg, int slot) {
     }
 }
 
+// Add entry to the storage at the given slot
 void MessageStorage::addEntry(String text, int slot) {
     if (slot < MESSAGE_STORAGE_SLOTS && slot >= 0) {
         arr[slot].msg.text = text;
@@ -91,6 +92,7 @@ void MessageStorage::addEntry(String text, int slot) {
 //     }
 // }
 
+// Add entry to the storage at the given slot
 void MessageStorage::addEntry(String text, bool emergency, int slot) {
     if (slot < MESSAGE_STORAGE_SLOTS && slot >= 0) {
         arr[slot].msg.text = text;
@@ -108,8 +110,68 @@ void MessageStorage::addEntry(String text, bool emergency, int slot) {
 //     }
 // }
 
+// Add entry to the next free slot
+void MessageStorage::addEntryNext(Message msg) {
+    // Look through the storage array for the first free slot
+    for (int i = 0; i < MESSAGE_STORAGE_SLOTS; i++) {
+        if (arr[i].empty) {
+            addEntry(msg, i);
+            break;
+        }
+
+        // If no free spot available, replace last message
+        if (i == (MESSAGE_STORAGE_SLOTS - 1) && (arr[i].empty == false)) {
+            deleteEntry(i);
+            addEntry(msg, i);
+            break;
+        }
+    }
+}
+
+// Add entry to the next free slot
+void MessageStorage::addEntryNext(String text) {
+    // Look through the storage array for the first free slot
+    for (int i = 0; i < MESSAGE_STORAGE_SLOTS; i++) {
+        if (arr[i].empty) {
+            addEntry(text, i);
+            break;
+        }
+
+        // If no free spot available, replace last message
+        if (i == (MESSAGE_STORAGE_SLOTS - 1) && (arr[i].empty == false)) {
+            deleteEntry(i);
+            addEntry(text, i);
+            break;
+        }
+    }
+}
+
+// Add entry to the next free slot
+void MessageStorage::addEntryNext(String text, bool emergency) {
+    // Look through the storage array for the first free slot
+    for (int i = 0; i < MESSAGE_STORAGE_SLOTS; i++) {
+        if (arr[i].empty) {
+            addEntry(text, emergency, i);
+            break;
+        }
+
+        // If no free spot available, replace last message
+        if (i == (MESSAGE_STORAGE_SLOTS - 1) && (arr[i].empty == false)) {
+            deleteEntry(i);
+            addEntry(text, emergency, i);
+            break;
+        }
+    }
+}
+
 void MessageStorage::deleteEntry(int slot) {
     arr[slot] = MessageEntry(); // Overwrite empty messageEntry to the slot, auto sets bool empty to true
+}
+
+void MessageStorage::deleteAll() {
+    for (int i = 0; i < MESSAGE_STORAGE_SLOTS; i++) {
+        deleteEntry(i);
+    }
 }
 
 // void MessageStorage::debugPrintContents() {
@@ -134,10 +196,12 @@ void MessageStorage::deleteEntry(int slot) {
 //     }
 // }
 
+// Return contents of the given slot
 Message MessageStorage::returnEntry(int slot) {
     return arr[slot].msg;
 }
 
+// Returns true if slot is empty
 bool MessageStorage::returnIfEmpty(int slot) {
     return arr[slot].empty;
 }
