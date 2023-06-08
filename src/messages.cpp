@@ -2,7 +2,7 @@
 
 Message::Message() {
     this->emergency = false;
-    this->text = "ERROR NO TEXT IN MESSAGE";
+    this->text = "ERROR NO TEXT IN MESSAGE, YOU SHOULDN'T BE ABLE TO SEE THIS";
 }
 
 Message::Message(String text) {
@@ -10,27 +10,10 @@ Message::Message(String text) {
     this->emergency = false;
 }
 
-// Message::Message(String text, GpsCoordinates coords) {
-//     this->text = text;
-//     this->coords = coords;
-//     this->emergency = false;
-// }
-
 Message::Message(String text, bool emergency) {
     this->text = text;
     this->emergency = emergency;
 }
-
-// Message::Message(String text, GpsCoordinates coords, bool emergency) {
-//     this->text = text;
-//     this->coords = coords;
-//     this->emergency = emergency;
-// }
-
-// Message::Message(GpsCoordinates coords) {
-//     this->coords = coords;
-//     this->text = "ERROR NO TEXT IN MESSAGE";
-// }
 
 MessageEntry::MessageEntry() {
 }
@@ -84,14 +67,6 @@ void MessageStorage::addEntry(String text, int slot) {
     }
 }
 
-// void MessageStorage::addEntry(String text, GpsCoordinates coords, int slot) {
-//     if (slot < MESSAGE_STORAGE_SLOTS && slot >= 0) {
-//         arr[slot].msg.text = text;
-//         arr[slot].msg.coords = coords;
-//         arr[slot].empty = false; // Slot is taken, therefore empty set to false
-//     }
-// }
-
 // Add entry to the storage at the given slot
 void MessageStorage::addEntry(String text, bool emergency, int slot) {
     if (slot < MESSAGE_STORAGE_SLOTS && slot >= 0) {
@@ -100,15 +75,6 @@ void MessageStorage::addEntry(String text, bool emergency, int slot) {
         arr[slot].empty = false; // Slot is taken, therefore empty set to false
     }
 }
-
-// void MessageStorage::addEntry(String text, GpsCoordinates coords, bool emergency, int slot) {
-//     if (slot < MESSAGE_STORAGE_SLOTS && slot >= 0) {
-//         arr[slot].msg.text = text;
-//         arr[slot].msg.coords = coords;
-//         arr[slot].msg.emergency = emergency;
-//         arr[slot].empty = false; // Slot is taken, therefore empty set to false
-//     }
-// }
 
 // Add entry to the next free slot
 void MessageStorage::addEntryNext(Message msg) {
@@ -204,4 +170,54 @@ Message MessageStorage::returnEntry(int slot) {
 // Returns true if slot is empty
 bool MessageStorage::returnIfEmpty(int slot) {
     return arr[slot].empty;
+}
+
+// Set the message of the slot to read
+void MessageStorage::setRead(int slot) {
+    arr[slot].read = true;
+}
+
+// Returns true if slot has been read
+bool MessageStorage::returnIfRead(int slot) {
+    return arr[slot].read;
+}
+
+// Returns true if there are any unread messages in the array
+bool MessageStorage::returnAnyUnread()
+{
+    for (int i = 0; i < MESSAGE_STORAGE_SLOTS; i ++) {
+        if (!returnIfEmpty(i) && !returnIfRead(i)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void MessageStorage::reorganize() {
+    // Read 1 further than the empty spot, take that item and put it in the empty spot, stop if there's 2 empty spots in a row
+    for (int i = 0; i < MESSAGE_STORAGE_SLOTS-1; i++) {
+        if (returnIfEmpty(i) && !returnIfEmpty(i+1)) {
+            Serial.println("Adding and deleting entry");
+            // If the current spot is empty, and the next spot is not, then
+            // add the entry past the empty spot in the empty spot
+            // and delete the entry past the empty spot
+            addMessageEntry(returnMessageEntry(i+1), i);
+            deleteEntry(i+1);
+        } else if (returnIfEmpty(i) && returnIfEmpty(i+1)) {
+            Serial.println("breaking");
+            break; // Break out of loop if there's 2 empty spots in a row
+        }
+    }
+}
+
+// Return the full message entry of the message entry array, includes if the entry is empty or has been read
+MessageEntry MessageStorage::returnMessageEntry(int slot)
+{
+    return arr[slot];
+}
+
+void MessageStorage::addMessageEntry(MessageEntry entry, int slot)
+{
+    arr[slot] = entry;
 }

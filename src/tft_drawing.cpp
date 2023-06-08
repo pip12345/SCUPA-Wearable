@@ -188,10 +188,19 @@ void DrawMap::drawText() {
     tft.print((float)(1 / pixels_per_meter));
     tft.print(" m/px");
 
+    // Draw current depth in lower left corner
     tft.setCursor(0, TFT_Y - 10);
     tft.print("Depth: ");
     tft.print(gps_storage.returnUser().depth);
     tft.print(" m");
+
+    // Draw text indicating there are unread messages
+    if (msg_storage.returnAnyUnread()) {
+        tft.setTextColor(ST77XX_GREEN);
+        tft.setCursor(0, TFT_Y - 20);
+        tft.print("UNREAD MESSAGES");
+        tft.setTextColor(ST77XX_WHITE);
+    }
 }
 
 // Draw all GPS coordinates stored in the GpsStorage object except the user itself
@@ -251,17 +260,30 @@ void DrawMenu::updateMenu() {
     // Draw Text
     tft.setTextWrap(true);
     tft.setTextColor(ST77XX_WHITE);
-    tft.setCursor(0, 20);
     tft.setTextSize(2); // 12*16
-    tft.println(" Map");
+
+    tft.setCursor(0, 20);
+    tft.print(" Map");
+
     tft.setCursor(0, 20 + MENU_SPACING);
-    tft.println(" Bookmarks");
+    tft.print(" Bookmarks");
+
     tft.setCursor(0, 20 + MENU_SPACING * 2);
-    tft.println(" Check Messages");
+    tft.print(" Check Messages");
+
+    // Indicate if there are unread messages next to check messages
+    if (msg_storage.returnAnyUnread()) {
+        tft.setTextColor(ST77XX_GREEN);
+        tft.print(" - UNREAD");
+        tft.setTextColor(ST77XX_WHITE);
+    }
+
     tft.setCursor(0, 20 + MENU_SPACING * 3);
-    tft.println(" Send Message");
+    tft.print(" Send Message");
+
     tft.setCursor(0, 20 + MENU_SPACING * 4);
-    tft.println(" Send Emergency Message");
+    tft.print(" Send Emergency Message");
+
     tft.setTextSize(1);
 }
 
@@ -573,12 +595,27 @@ void DrawCheckMessages::updateCheckMessages() {
     for (int i = current_page * MAX_MENU_ITEMS; i <= (current_page * MAX_MENU_ITEMS) + MAX_MENU_ITEMS; i++) {
         if (i < GPS_STORAGE_SLOTS && !msg_storage.returnIfEmpty(i)) { // only print if not empty
             // Draw the message for each slot
+            tft.setTextColor(ST77XX_WHITE);
             tft.setCursor(0, 20 + ((MENU_SPACING * i) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)));
             tft.print(i + 1);
             tft.print(" - ");
+
+            // Print in green if unread, white if read
+            if (!msg_storage.returnIfRead(i)) {
+                tft.setTextColor(ST77XX_GREEN);
+            } else {
+                tft.setTextColor(ST77XX_WHITE);
+            }
+
+            // Print in red if it's an emergency message
+            if (msg_storage.returnEntry(i).emergency) {
+                tft.setTextColor(ST77XX_RED);
+            }
+            
             tft.println(msg_storage.returnEntry(i).text);
         }
     }
+
     tft.setTextWrap(true);
     tft.setTextSize(1);
 
@@ -627,6 +664,9 @@ void DrawCheckMessages::updateInfoPanel() {
     tft.setTextColor(ST77XX_BLUE);
     tft.println("CHECK MESSAGES - MESSAGE INFO");
     tft.setTextColor(ST77XX_WHITE);
+
+    // Set currently opened message to read.
+    msg_storage.setRead(selected_item);
 }
 
 void DrawCheckMessages::upMenu() {

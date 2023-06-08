@@ -82,11 +82,9 @@ void setup() {
     msg_storage.addEntryNext("Cool message");
     msg_storage.addEntryNext("Cool emergency", true);
     msg_storage.addEntryNext("Cool message");
-    msg_storage.addEntryNext("Cool message");
     msg_storage.addEntryNext("Cool emergency", true);
-    msg_storage.addEntryNext("Cool message");
-    msg_storage.addEntryNext("Cool message");
     msg_storage.addEntryNext("I am in excruciating pain without any indication if it will stop any time soon, please send help");
+    msg_storage.addEntryNext("Cool message");
     msg_storage.addEntryNext("Cool last message");
     /////// DEBUG //////////
 
@@ -141,6 +139,7 @@ void loop() {
 
         if (btn_right_pressed) {
             // something here still?
+            msg_storage.addEntryNext("WOW A NEW MESSAGE ARRIVED");
         }
 
         break;
@@ -215,13 +214,12 @@ void loop() {
         if (btn_right_long_pressed) {
             // Button press actions per sub state
             if (bookmarks.current_sub_state == bookmarks.Substate::list) {
-
+                // Show warning popup if in the list state
                 if (bookmarks.returnSelectedItem() != 0) {
-                    // Show warning popup if in the list state
                     bookmarks.current_sub_state = bookmarks.Substate::warning_popup;
                     bookmarks.updateWarningPopUp(); // Force update to show instantly
                 }
-            // If long pressed again while in the warning popup state
+                // If long pressed again while in the warning popup state
             } else if (bookmarks.current_sub_state == bookmarks.Substate::warning_popup) {
                 gps_storage.deleteBookmark(bookmarks.returnSelectedItem()); // Delete GPS if in the popup state
                 bookmarks.current_sub_state = bookmarks.Substate::list;
@@ -260,23 +258,24 @@ void loop() {
         }
 
         if (btn_right_pressed) {
-            messages_check.current_sub_state = messages_check.Substate::info_popup;
-            messages_check.updateInfoPanel(); /// Force update to show instantly
+            if (!messages_check.current_sub_state == messages_check.Substate::warning_popup) {
+                messages_check.current_sub_state = messages_check.Substate::info_popup;
+                messages_check.updateInfoPanel(); /// Force update to show instantly
+            }
         }
 
         if (btn_right_long_pressed) {
             // Button press actions per sub state
             if (messages_check.current_sub_state == messages_check.Substate::list) {
+                // Show warning popup if in the list state
+                messages_check.current_sub_state = messages_check.Substate::warning_popup;
+                messages_check.updateWarningPopUp(); // Force update to show instantly
 
-                if (messages_check.returnSelectedItem() != 0) {
-                    // Show warning popup if in the list state
-                    messages_check.current_sub_state = messages_check.Substate::warning_popup;
-                    messages_check.updateWarningPopUp(); // Force update to show instantly
-                }
-            // If long pressed again while in the warning popup state
+                // If long pressed again while in the warning popup state
             } else if (messages_check.current_sub_state == messages_check.Substate::warning_popup) {
                 msg_storage.deleteEntry(messages_check.returnSelectedItem()); // Delete message if in the popup state
-                messages_check.current_sub_state = messages_check.Substate::list;
+                msg_storage.reorganize(); // Reorganize list to avoid empty spot in the middle
+                messages_check.current_sub_state = messages_check.Substate::list; // Return to list state
                 messages_check.updateCheckMessages(); // Force update to make popup disappear instantly
             }
         }
