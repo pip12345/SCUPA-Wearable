@@ -1,6 +1,7 @@
 #include "tft_drawing.h"
 
-extern GpsStorage gps_storage; // Requires gps_storage to be declared elsewhere
+extern GpsStorage gps_storage;     // Requires gps_storage to be declared in main
+extern MessageStorage msg_storage; // Requires msg_storage to be declared in main
 
 // Inits tft in this cpp file on creation of the drawcontroller, use this for all global stuff
 // tft commands such as tft.drawPixel ONLY WORK inside this .cpp file
@@ -90,8 +91,8 @@ void DrawMap::updateRingsRadiusText(int range_close, int range_medium) {
 
 // Update the compass direction and draw the compass
 void DrawMap::updateCompass(float angle) {
-    // TEMP: convert angle from compass angle (0 degrees = north) to unit circle angle (0 degrees = E)
-    angle = 360 + (90 - angle);
+    // !!!!!!!!!!!!! PLEASE CHECK BELOW LINE !!!!!!!!!!!!!!
+    angle = 360 + (90 - angle); // TEMP: convert angle from compass angle (0 degrees = north) to unit circle angle (0 degrees = E)
 
     int x_offset{};
     int y_offset{}; // The resulting offsets from the center point
@@ -149,6 +150,7 @@ void DrawMap::drawCourse() {
             tft.println(course_id);
             tft.print("Distance: ");
             tft.print(distGPStoUser(gps_storage, course_id));
+            tft.print(" m");
 
             // Print depth info underneath selected dot
             tft.setTextColor(ST77XX_BLUE);
@@ -186,10 +188,19 @@ void DrawMap::drawText() {
     tft.print((float)(1 / pixels_per_meter));
     tft.print(" m/px");
 
+    // Draw current depth in lower left corner
     tft.setCursor(0, TFT_Y - 10);
     tft.print("Depth: ");
     tft.print(gps_storage.returnUser().depth);
     tft.print(" m");
+
+    // Draw text indicating there are unread messages
+    if (msg_storage.returnAnyUnread()) {
+        tft.setTextColor(ST77XX_GREEN);
+        tft.setCursor(0, TFT_Y - 20);
+        tft.print("UNREAD MESSAGES");
+        tft.setTextColor(ST77XX_WHITE);
+    }
 }
 
 // Draw all GPS coordinates stored in the GpsStorage object except the user itself
@@ -249,17 +260,30 @@ void DrawMenu::updateMenu() {
     // Draw Text
     tft.setTextWrap(true);
     tft.setTextColor(ST77XX_WHITE);
-    tft.setCursor(0, 20);
     tft.setTextSize(2); // 12*16
-    tft.println(" Map");
+
+    tft.setCursor(0, 20);
+    tft.print(" Map");
+
     tft.setCursor(0, 20 + MENU_SPACING);
-    tft.println(" Bookmarks");
+    tft.print(" Bookmarks");
+
     tft.setCursor(0, 20 + MENU_SPACING * 2);
-    tft.println(" Check Messages");
+    tft.print(" Check Messages");
+
+    // Indicate if there are unread messages next to check messages
+    if (msg_storage.returnAnyUnread()) {
+        tft.setTextColor(ST77XX_GREEN);
+        tft.print(" - UNREAD");
+        tft.setTextColor(ST77XX_WHITE);
+    }
+
     tft.setCursor(0, 20 + MENU_SPACING * 3);
-    tft.println(" Send Message");
+    tft.print(" Send Message");
+
     tft.setCursor(0, 20 + MENU_SPACING * 4);
-    tft.println(" Send Emergency Message");
+    tft.print(" Send Emergency Message");
+
     tft.setTextSize(1);
 }
 
@@ -351,6 +375,12 @@ void DrawBookmarks::updateBookmarks() {
     }
     tft.setTextWrap(true);
     tft.setTextSize(1);
+
+    // Top of screen info that shows currently entered menu option
+    tft.setCursor(0, 0);
+    tft.setTextColor(ST77XX_BLUE);
+    tft.println("BOOKMARKS");
+    tft.setTextColor(ST77XX_WHITE);
 }
 
 void DrawBookmarks::updateWarningPopUp() {
@@ -517,7 +547,7 @@ void DrawBookmarks::downMenu() {
             Serial.print("selected_item: ");
             Serial.println(selected_item);
             Serial.print("current_page: ");
-            Serial.println(current_page); 
+            Serial.println(current_page);
 
             updateBookmarks();
         }
@@ -525,5 +555,274 @@ void DrawBookmarks::downMenu() {
 }
 
 int DrawBookmarks::returnSelectedItem() {
+    return selected_item;
+}
+
+void DrawCheckMessages::loopCheckMessages() {
+    current_time = millis();
+    if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
+        previous_time = current_time;
+
+        // State machine for handling different subwindows within the bookmarks menu
+        switch (current_sub_state) {
+        case list:
+            updateCheckMessages();
+            break;
+        case warning_popup:
+            // updateWarningPopUp();
+            break;
+        case info_popup:
+            // updateInfoPanel();
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+void DrawCheckMessages::updateCheckMessages() {
+    tft.fillScreen(BACKGROUND_COLOR); // Clear screen
+
+    // Draw block for currently selected menu item
+    // Always resets back to the first location when going to the next page
+    tft.fillRoundRect(0, 18 - ITEM_BORDER_SIZE + ((MENU_SPACING * selected_item) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)), TFT_X, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
+
+    // Draw Text
+    tft.setTextWrap(false); // Disable text wrap because it may screw with the element positioning in the menu
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setTextSize(2); // 12*16
+
+    for (int i = current_page * MAX_MENU_ITEMS; i <= (current_page * MAX_MENU_ITEMS) + MAX_MENU_ITEMS; i++) {
+        if (i < MESSAGE_STORAGE_SLOTS && !msg_storage.returnIfEmpty(i)) { // only print if not empty
+            // Draw the message for each slot
+            tft.setTextColor(ST77XX_WHITE);
+            tft.setCursor(0, 20 + ((MENU_SPACING * i) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)));
+            tft.print(i + 1);
+            tft.print(" - ");
+
+            // Print in green if unread, white if read
+            if (!msg_storage.returnIfRead(i)) {
+                tft.setTextColor(ST77XX_GREEN);
+            } else {
+                tft.setTextColor(ST77XX_WHITE);
+            }
+
+            // Print in red if it's an emergency message
+            if (msg_storage.returnEntry(i).emergency) {
+                tft.setTextColor(ST77XX_RED);
+            }
+
+            tft.println(msg_storage.returnEntry(i).text);
+        }
+    }
+
+    tft.setTextWrap(true);
+    tft.setTextSize(1);
+
+    // Top of screen info that shows currently entered menu option
+    tft.setCursor(0, 0);
+    tft.setTextColor(ST77XX_BLUE);
+    tft.println("CHECK MESSAGES");
+    tft.setTextColor(ST77XX_WHITE);
+}
+
+void DrawCheckMessages::updateWarningPopUp() {
+    // Don't clear screen on purpose, we want to still see what is in the background
+
+    // Draw textbox in the center of the screen
+    // Hardcoded because I'm lazy
+    tft.fillRoundRect(POPUP_SIZE, POPUP_SIZE, TFT_X - 2 * POPUP_SIZE, TFT_Y - 2 * POPUP_SIZE, 10, ST77XX_RED);
+    tft.setTextWrap(true);
+    tft.setTextSize(2);
+    tft.setTextColor(ST77XX_YELLOW);
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 20);
+    tft.println("Delete Message");
+    tft.setTextSize(1);
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 50);
+    tft.println("Are you sure you wish to delete");
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 60);
+    tft.println("        this message?");
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 100);
+    tft.println("LONG PRESS RIGHT to confirm");
+    tft.setCursor(POPUP_SIZE + 20, POPUP_SIZE + 120);
+    tft.println("Press LEFT to cancel");
+}
+
+void DrawCheckMessages::updateInfoPanel() {
+    tft.fillScreen(BACKGROUND_COLOR); // Clear screen
+    tft.setTextWrap(true);
+    tft.setTextSize(2);
+    tft.setTextColor(ST77XX_WHITE);
+
+    tft.setCursor(0, 20);
+    tft.println(msg_storage.returnEntry(selected_item).text);
+    tft.setTextSize(1);
+
+    // Top of screen info that shows currently entered menu option
+    tft.setCursor(0, 0);
+    tft.setTextColor(ST77XX_BLUE);
+    tft.println("CHECK MESSAGES - MESSAGE INFO");
+    tft.setTextColor(ST77XX_WHITE);
+
+    // Set currently opened message to read.
+    msg_storage.setRead(selected_item);
+}
+
+void DrawCheckMessages::upMenu() {
+    if (selected_item > 0 && selected_item < MESSAGE_STORAGE_SLOTS) {
+        selected_item -= 1;
+
+        /* We can calculate the current page by rounding down
+        selected_item, then dividing it by 11.
+        We do that because there are 11 unique elements per page since the last
+        element always gets redrawn at the top of the next page. */
+
+        current_page = (float)(int)(selected_item + 0.5) / 11; // use datatype rounding down trick
+        Serial.print("selected_item: ");
+        Serial.println(selected_item);
+        Serial.print("current_page: ");
+        Serial.println(current_page);
+
+        updateCheckMessages();
+    }
+}
+
+void DrawCheckMessages::downMenu() {
+    if (selected_item >= 0 && selected_item < (MESSAGE_STORAGE_SLOTS - 1) && !msg_storage.returnIfEmpty(selected_item + 1)) { // Avoid going down into an empty slot
+        selected_item += 1;
+
+        /* We can calculate the current page by rounding down
+        selected_item, then dividing it by 11.
+        We do that because there are 11 unique elements per page since the last
+        element always gets redrawn at the top of the next page. */
+
+        current_page = (int)(selected_item + 0.5) / 11; // use datatype rounding down trick
+        Serial.print("selected_item: ");
+        Serial.println(selected_item);
+        Serial.print("current_page: ");
+        Serial.println(current_page);
+
+        updateCheckMessages();
+    }
+}
+
+int DrawCheckMessages::returnSelectedItem() {
+    return selected_item;
+}
+
+void DrawCheckMessages::setSelectedItem(int value) {
+    if (value >= 0 && value <= MESSAGE_STORAGE_SLOTS) {
+        selected_item = value;
+    }
+}
+
+void DrawSendMessage::loopSendMessage() {
+    current_time = millis();
+    if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
+        previous_time = current_time;
+        updateSendMessage();
+    }
+}
+
+void DrawSendMessage::updateSendMessage() {
+    tft.fillScreen(BACKGROUND_COLOR); // Clear screen
+
+    // Draw block for currently selected menu item
+    // Always resets back to the first location when going to the next page
+    tft.fillRoundRect(0, 18 - ITEM_BORDER_SIZE + (MENU_SPACING * selected_item), TFT_X, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
+
+    // Draw Text
+    tft.setTextWrap(false); // Disable text wrap because it may screw with the element positioning in the menu
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setTextSize(2); // 12*16
+
+    for (int i = 0; i <= MAX_MENU_ITEMS; i++) {
+        if (i < MESSAGE_DESCRIPTION_SLOTS) {
+            tft.setCursor(0, 20 + (MENU_SPACING * i));
+            tft.print("SEND: ");
+            tft.println(msg_storage.message_descriptions[i]);
+        }
+    }
+    tft.setTextWrap(true);
+    tft.setTextSize(1);
+
+    // Top of screen info that shows currently entered menu option
+    tft.setCursor(0, 0);
+    tft.setTextColor(ST77XX_BLUE);
+    tft.println("SEND MESSAGE");
+    tft.setTextColor(ST77XX_WHITE);
+}
+
+void DrawSendMessage::upMenu() {
+    if (selected_item > 0 && selected_item <= MAX_MENU_ITEMS) {
+        selected_item -= 1;
+        updateSendMessage();
+    }
+}
+
+void DrawSendMessage::downMenu() {
+    if (selected_item >= 0 && selected_item < MAX_MENU_ITEMS) {
+        selected_item += 1;
+        updateSendMessage();
+    }
+}
+
+int DrawSendMessage::returnSelectedItem() {
+    return selected_item;
+}
+
+void DrawSendEmergency::loopSendEmergency() {
+    current_time = millis();
+    if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
+        previous_time = current_time;
+        updateSendEmergency();
+    }
+}
+
+void DrawSendEmergency::updateSendEmergency() {
+    tft.fillScreen(BACKGROUND_COLOR); // Clear screen
+
+    // Draw block for currently selected menu item
+    // Always resets back to the first location when going to the next page
+    tft.fillRoundRect(0, 18 - ITEM_BORDER_SIZE + (MENU_SPACING * selected_item), TFT_X, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
+
+    // Draw Text
+    tft.setTextWrap(false); // Disable text wrap because it may screw with the element positioning in the menu
+    tft.setTextColor(ST77XX_ORANGE);
+    tft.setTextSize(2); // 12*16
+
+    for (int i = 0; i <= MAX_MENU_ITEMS; i++) {
+        if (i < MESSAGE_DESCRIPTION_SLOTS) {
+            tft.setCursor(0, 20 + (MENU_SPACING * i));
+            tft.print("SEND: ");
+            tft.println(msg_storage.emergency_descriptions[i]);
+        }
+    }
+    tft.setTextWrap(true);
+    tft.setTextSize(1);
+
+    // Top of screen info that shows currently entered menu option
+    tft.setCursor(0, 0);
+    tft.setTextColor(ST77XX_RED);
+    tft.println("SEND EMERGENCY MESSAGE");
+    tft.setTextColor(ST77XX_WHITE);
+}
+
+void DrawSendEmergency::upMenu() {
+    if (selected_item > 0 && selected_item <= MAX_MENU_ITEMS) {
+        selected_item -= 1;
+        updateSendEmergency();
+    }
+}
+
+void DrawSendEmergency::downMenu() {
+    if (selected_item >= 0 && selected_item < MAX_MENU_ITEMS) {
+        selected_item += 1;
+        updateSendEmergency();
+    }
+}
+
+int DrawSendEmergency::returnSelectedItem() {
     return selected_item;
 }

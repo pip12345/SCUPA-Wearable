@@ -7,16 +7,22 @@
 #define UP_PIN 33
 #define DOWN_PIN 25
 #define LEFT_PIN 26
-#define RIGHT_PIN 13
+#define RIGHT_PIN 19
 
 DrawController screen;
 DrawMap gps_map;
 DrawMenu menu;
 DrawBookmarks bookmarks;
+DrawCheckMessages messages_check;
+DrawSendMessage messages_send;
+DrawSendEmergency messages_emergency_send;
+
 GpsStorage gps_storage; // stores GPS coordinates that get drawn on the screen
+MessageStorage msg_storage;
 
 Button2 btn_up, btn_down, btn_left, btn_right;
 bool btn_up_pressed{}, btn_down_pressed{}, btn_left_pressed{}, btn_right_pressed{}, btn_right_long_pressed{};
+bool emergency_displayed{}; // Flag used to only display a single emergency message at once
 
 enum State { main_menu,
              map_display,
@@ -74,6 +80,12 @@ void setup() {
     }
     gps_storage.addBookmark(69, 69, 0, "This was painful", 63);
     /////// DEBUG //////////
+    msg_storage.addEntryNext("Cool message 1");
+    msg_storage.addEntryNext("Cool message 2");
+    msg_storage.addEntryNext("I am in excruciating pain without any indication if it will stop any time soon, please send help");
+    msg_storage.addEntryNext("Cool message 3");
+    msg_storage.addEntryNext("Cool last message");
+    /////// DEBUG //////////
 
     Serial.println("Setup finished");
 }
@@ -94,6 +106,11 @@ void loop() {
 
         if (btn_down_pressed) {
             menu.downMenu();
+        }
+
+        if (btn_left_pressed) {
+            // quick return to map
+            current_state = map_display;
         }
 
         if (btn_right_pressed) {
@@ -121,6 +138,7 @@ void loop() {
 
         if (btn_right_pressed) {
             // something here still?
+            // msg_storage.addEmergencyNext("EMERGENCY - VERY IMPORTANT EMERGENCY MESSAGE OH MY GOD"); // debug
         }
 
         break;
@@ -195,17 +213,14 @@ void loop() {
         if (btn_right_long_pressed) {
             // Button press actions per sub state
             if (bookmarks.current_sub_state == bookmarks.Substate::list) {
-
+                // Show warning popup if in the list state
                 if (bookmarks.returnSelectedItem() != 0) {
-                    // Show warning popup if in the list state
                     bookmarks.current_sub_state = bookmarks.Substate::warning_popup;
                     bookmarks.updateWarningPopUp(); // Force update to show instantly
                 }
-
+                // If long pressed again while in the warning popup state
             } else if (bookmarks.current_sub_state == bookmarks.Substate::warning_popup) {
-
-                // Delete GPS if in the popup state
-                gps_storage.deleteBookmark(bookmarks.returnSelectedItem());
+                gps_storage.deleteBookmark(bookmarks.returnSelectedItem()); // Delete GPS if in the popup state
                 bookmarks.current_sub_state = bookmarks.Substate::list;
                 bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
             }
@@ -213,19 +228,107 @@ void loop() {
 
         break;
     case check_messages:
-        // code here
-        Serial.println("check messages selected");
-        current_state = main_menu;
+        messages_check.loopCheckMessages();
+
+        if (btn_up_pressed) {
+            if (messages_check.current_sub_state != messages_check.Substate::warning_popup) // Don't allow scrolling up or down while in the deletion prompt
+                messages_check.upMenu();
+        }
+
+        if (btn_down_pressed) {
+            if (messages_check.current_sub_state != messages_check.Substate::warning_popup) // Don't allow scrolling up or down while in the deletion prompt
+                messages_check.downMenu();
+        }
+
+        if (btn_left_pressed) {
+            // Button press actions per sub state
+            if (messages_check.current_sub_state == messages_check.Substate::list) {
+                // return to main menu
+                current_state = main_menu;
+            } else if (messages_check.current_sub_state == messages_check.Substate::warning_popup) {
+                // return to list
+                messages_check.current_sub_state = messages_check.Substate::list;
+                messages_check.updateCheckMessages(); // Force update to make popup disappear instantly
+            } else if (messages_check.current_sub_state == messages_check.Substate::info_popup) {
+                // return to list
+                emergency_displayed = false; // set emergency displayed flag to false, in case the user was put into this state due to an emergency message arriving
+
+                messages_check.current_sub_state = messages_check.Substate::list;
+                messages_check.updateCheckMessages(); // Force update to make popup disappear instantly
+            }
+        }
+
+        if (btn_right_pressed) {
+            if (!messages_check.current_sub_state == messages_check.Substate::warning_popup) {
+                messages_check.current_sub_state = messages_check.Substate::info_popup;
+                messages_check.updateInfoPanel(); /// Force update to show instantly
+            }
+        }
+
+        if (btn_right_long_pressed) {
+            // Button press actions per sub state
+            if (messages_check.current_sub_state == messages_check.Substate::list) {
+                // Show warning popup if in the list state
+                messages_check.current_sub_state = messages_check.Substate::warning_popup;
+                messages_check.updateWarningPopUp(); // Force update to show instantly
+
+                // If long pressed again while in the warning popup state
+            } else if (messages_check.current_sub_state == messages_check.Substate::warning_popup) {
+                msg_storage.deleteEntry(messages_check.returnSelectedItem());     // Delete message if in the popup state
+                msg_storage.reorganize();                                         // Reorganize list to avoid empty spot in the middle
+                messages_check.current_sub_state = messages_check.Substate::list; // Return to list state
+                messages_check.updateCheckMessages();                             // Force update to make popup disappear instantly
+            }
+        }
+
         break;
     case send_message:
-        // code here
-        Serial.println("send message selected");
-        current_state = main_menu;
+        messages_send.loopSendMessage();
+
+        if (btn_up_pressed) {
+            messages_send.upMenu();
+        }
+
+        if (btn_down_pressed) {
+            messages_send.downMenu();
+        }
+
+        if (btn_left_pressed) {
+            // return to main menu
+            current_state = main_menu;
+        }
+
+        if (btn_right_pressed) {
+            // Send currently selected item
+
+            // TO DO: ADD CODE HERE TO ACTUALLY SEND IT
+            Serial.print("Send message: ");
+            Serial.println(msg_storage.message_descriptions[messages_send.returnSelectedItem()]);
+        }
         break;
     case send_emergency:
-        // code here
-        Serial.println("emergency message selected");
-        current_state = main_menu;
+        messages_emergency_send.loopSendEmergency();
+
+        if (btn_up_pressed) {
+            messages_emergency_send.upMenu();
+        }
+
+        if (btn_down_pressed) {
+            messages_emergency_send.downMenu();
+        }
+
+        if (btn_left_pressed) {
+            // return to main menu
+            current_state = main_menu;
+        }
+
+        if (btn_right_pressed) {
+            // Send currently selected item
+            
+            // TO DO: ADD CODE HERE TO ACTUALLY SEND IT
+            Serial.print("Send message: ");
+            Serial.println(msg_storage.emergency_descriptions[messages_emergency_send.returnSelectedItem()]);
+        }
         break;
     default:
         current_state = map_display;
@@ -237,4 +340,17 @@ void loop() {
     btn_left_pressed = false;
     btn_right_pressed = false;
     btn_right_long_pressed = false;
+
+    // Check for emergency messages and set to pop up if there is one
+    if (!emergency_displayed) {
+        if (msg_storage.returnEmergencySlot() != -1) {
+            emergency_displayed = true;
+
+            // Go to pop up state and pop up the message
+            current_state = check_messages;
+            messages_check.current_sub_state = messages_check.Substate::info_popup;
+            messages_check.setSelectedItem(msg_storage.returnEmergencySlot());
+            messages_check.updateInfoPanel(); /// Force update to show instantly
+        }
+    }
 }
