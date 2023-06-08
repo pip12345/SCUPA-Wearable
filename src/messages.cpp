@@ -130,6 +130,26 @@ void MessageStorage::addEntryNext(String text, bool emergency) {
     }
 }
 
+// Returns the slot of the first unread emergency message found, else returns -1
+int MessageStorage::returnEmergencySlot() {
+    for (int i = 0; i < MESSAGE_STORAGE_SLOTS; i++) {
+        if (!returnIfEmpty(i) && !returnIfRead(i)) {
+            if (returnEntry(i).emergency) {
+                return i;
+            }
+        } else if (returnIfEmpty(i)) {
+            // Break if it goes into the empty region
+            return -1;
+        }
+    }
+
+    return -1;
+}
+
+void MessageStorage::addEmergencyNext(String text) {
+    addEntryNext(text, true); // add entry with emergency bool set to true;
+}
+
 void MessageStorage::deleteEntry(int slot) {
     arr[slot] = MessageEntry(); // Overwrite empty messageEntry to the slot, auto sets bool empty to true
 }
@@ -183,11 +203,15 @@ bool MessageStorage::returnIfRead(int slot) {
 }
 
 // Returns true if there are any unread messages in the array
-bool MessageStorage::returnAnyUnread()
-{
-    for (int i = 0; i < MESSAGE_STORAGE_SLOTS; i ++) {
-        if (!returnIfEmpty(i) && !returnIfRead(i)) {
-            return true;
+bool MessageStorage::returnAnyUnread() {
+    for (int i = 0; i < MESSAGE_STORAGE_SLOTS; i++) {
+        if (!returnIfEmpty(i)) {
+            if (!returnIfRead(i)) {
+                return true;
+            }
+        } else {
+            // Break if it goes into the empty region
+            return false;
         }
     }
 
@@ -196,15 +220,15 @@ bool MessageStorage::returnAnyUnread()
 
 void MessageStorage::reorganize() {
     // Read 1 further than the empty spot, take that item and put it in the empty spot, stop if there's 2 empty spots in a row
-    for (int i = 0; i < MESSAGE_STORAGE_SLOTS-1; i++) {
-        if (returnIfEmpty(i) && !returnIfEmpty(i+1)) {
+    for (int i = 0; i < MESSAGE_STORAGE_SLOTS - 1; i++) {
+        if (returnIfEmpty(i) && !returnIfEmpty(i + 1)) {
             Serial.println("Adding and deleting entry");
             // If the current spot is empty, and the next spot is not, then
             // add the entry past the empty spot in the empty spot
             // and delete the entry past the empty spot
-            addMessageEntry(returnMessageEntry(i+1), i);
-            deleteEntry(i+1);
-        } else if (returnIfEmpty(i) && returnIfEmpty(i+1)) {
+            addMessageEntry(returnMessageEntry(i + 1), i);
+            deleteEntry(i + 1);
+        } else if (returnIfEmpty(i) && returnIfEmpty(i + 1)) {
             Serial.println("breaking");
             break; // Break out of loop if there's 2 empty spots in a row
         }
@@ -212,12 +236,10 @@ void MessageStorage::reorganize() {
 }
 
 // Return the full message entry of the message entry array, includes if the entry is empty or has been read
-MessageEntry MessageStorage::returnMessageEntry(int slot)
-{
+MessageEntry MessageStorage::returnMessageEntry(int slot) {
     return arr[slot];
 }
 
-void MessageStorage::addMessageEntry(MessageEntry entry, int slot)
-{
+void MessageStorage::addMessageEntry(MessageEntry entry, int slot) {
     arr[slot] = entry;
 }

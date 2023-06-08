@@ -171,6 +171,7 @@ class DrawCheckMessages {
     void downMenu();
 
     int returnSelectedItem();
+    void setSelectedItem(int value);
 
     enum Substate { list,
                     warning_popup, // Main bookmark list

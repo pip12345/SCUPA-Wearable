@@ -593,7 +593,7 @@ void DrawCheckMessages::updateCheckMessages() {
     tft.setTextSize(2); // 12*16
 
     for (int i = current_page * MAX_MENU_ITEMS; i <= (current_page * MAX_MENU_ITEMS) + MAX_MENU_ITEMS; i++) {
-        if (i < GPS_STORAGE_SLOTS && !msg_storage.returnIfEmpty(i)) { // only print if not empty
+        if (i < MESSAGE_STORAGE_SLOTS && !msg_storage.returnIfEmpty(i)) { // only print if not empty
             // Draw the message for each slot
             tft.setTextColor(ST77XX_WHITE);
             tft.setCursor(0, 20 + ((MENU_SPACING * i) - (current_page * MENU_SPACING * MAX_MENU_ITEMS)));
@@ -670,7 +670,7 @@ void DrawCheckMessages::updateInfoPanel() {
 }
 
 void DrawCheckMessages::upMenu() {
-    if (selected_item > 0 && selected_item < GPS_STORAGE_SLOTS) {
+    if (selected_item > 0 && selected_item < MESSAGE_STORAGE_SLOTS) {
         selected_item -= 1;
 
         /* We can calculate the current page by rounding down
@@ -689,7 +689,7 @@ void DrawCheckMessages::upMenu() {
 }
 
 void DrawCheckMessages::downMenu() {
-    if (selected_item >= 0 && selected_item < (GPS_STORAGE_SLOTS - 1) && !msg_storage.returnIfEmpty(selected_item + 1)) { // Avoid going down into an empty slot
+    if (selected_item >= 0 && selected_item < (MESSAGE_STORAGE_SLOTS - 1) && !msg_storage.returnIfEmpty(selected_item + 1)) { // Avoid going down into an empty slot
         selected_item += 1;
 
         /* We can calculate the current page by rounding down
@@ -709,6 +709,13 @@ void DrawCheckMessages::downMenu() {
 
 int DrawCheckMessages::returnSelectedItem() {
     return selected_item;
+}
+
+void DrawCheckMessages::setSelectedItem(int value)
+{
+    if (value >= 0 && value <= MESSAGE_STORAGE_SLOTS) {
+        selected_item = value;
+    }
 }
 
 /////////////////////////////////////////////// TO DO /////////////////////////////////////////////////////////
@@ -733,7 +740,7 @@ void DrawSendMessage::updateSendMessage() {
     tft.setTextSize(2); // 12*16
 
     for (int i = 0; i <= MAX_MENU_ITEMS; i++) {
-        if (i < GPS_STORAGE_SLOTS) {
+        if (i < MESSAGE_DESCRIPTION_SLOTS) {
             tft.setCursor(0, 20 + (MENU_SPACING * i));
             tft.print("SEND ");
             tft.print(" - ");

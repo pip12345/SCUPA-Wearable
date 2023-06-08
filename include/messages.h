@@ -19,15 +19,11 @@
 // Single instance of a message with text and an emergency flag
 struct Message {
     String text{};
-    // GpsCoordinates coords{};
-    bool emergency{};
+    bool emergency{false};
 
     Message();
     Message(String text);
-    // Message(GpsCoordinates coords);
-    // Message(String text, GpsCoordinates coords);
     Message(String text, bool emergency);
-    // Message(String text, GpsCoordinates coords, bool emergency);
 };
 
 // Message entry in the storage, includes extra information such as if the spot is empty or if the message has been read
@@ -46,18 +42,19 @@ class MessageStorage {
   public:
     MessageStorage();
 
-    void addEntryNext(Message msg);
     void addEntryNext(String text);
-    void addEntryNext(String text, bool emergency);
+    void addEmergencyNext(String text);
 
     void deleteEntry(int slot);
     void deleteAll();
 
+    void setRead(int slot);
+
     Message returnEntry(int slot);
     bool returnIfEmpty(int slot);
-
-    void setRead(int slot);
     bool returnIfRead(int slot);
+
+    int returnEmergencySlot();
     bool returnAnyUnread();
 
     void reorganize(); // Reorganize all messages to remove blank spaces
@@ -70,8 +67,12 @@ class MessageStorage {
   private:
     void addEntry(Message msg, int slot);
     void addEntry(String text, int slot);
-    void addEntry(String text, bool emergency, int slot)
-    ;
+    void addEntry(String text, bool emergency, int slot);
+
+    void addEntryNext(Message msg); // Unused
+    void addEntryNext(String text, bool emergency);
+
+    
     MessageEntry returnMessageEntry(int slot);
     void addMessageEntry(MessageEntry entry, int slot);
 

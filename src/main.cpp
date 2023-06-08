@@ -22,6 +22,7 @@ MessageStorage msg_storage;
 
 Button2 btn_up, btn_down, btn_left, btn_right;
 bool btn_up_pressed{}, btn_down_pressed{}, btn_left_pressed{}, btn_right_pressed{}, btn_right_long_pressed{};
+bool emergency_displayed{}; // Flag used to only display a single emergency message at once
 
 enum State { main_menu,
              map_display,
@@ -79,12 +80,10 @@ void setup() {
     }
     gps_storage.addBookmark(69, 69, 0, "This was painful", 63);
     /////// DEBUG //////////
-    msg_storage.addEntryNext("Cool message");
-    msg_storage.addEntryNext("Cool emergency", true);
-    msg_storage.addEntryNext("Cool message");
-    msg_storage.addEntryNext("Cool emergency", true);
+    msg_storage.addEntryNext("Cool message 1");
+    msg_storage.addEntryNext("Cool message 2");
     msg_storage.addEntryNext("I am in excruciating pain without any indication if it will stop any time soon, please send help");
-    msg_storage.addEntryNext("Cool message");
+    msg_storage.addEntryNext("Cool message 3");
     msg_storage.addEntryNext("Cool last message");
     /////// DEBUG //////////
 
@@ -139,7 +138,7 @@ void loop() {
 
         if (btn_right_pressed) {
             // something here still?
-            msg_storage.addEntryNext("WOW A NEW MESSAGE ARRIVED");
+            msg_storage.addEmergencyNext("EMERGENCY - VERY IMPORTANT EMERGENCY MESSAGE OH MY GOD"); // debug
         }
 
         break;
@@ -252,6 +251,8 @@ void loop() {
                 messages_check.updateCheckMessages(); // Force update to make popup disappear instantly
             } else if (messages_check.current_sub_state == messages_check.Substate::info_popup) {
                 // return to list
+                emergency_displayed = false; // set emergency displayed flag to false, in case the user was put into this state due to an emergency message arriving
+
                 messages_check.current_sub_state = messages_check.Substate::list;
                 messages_check.updateCheckMessages(); // Force update to make popup disappear instantly
             }
@@ -273,10 +274,10 @@ void loop() {
 
                 // If long pressed again while in the warning popup state
             } else if (messages_check.current_sub_state == messages_check.Substate::warning_popup) {
-                msg_storage.deleteEntry(messages_check.returnSelectedItem()); // Delete message if in the popup state
-                msg_storage.reorganize(); // Reorganize list to avoid empty spot in the middle
+                msg_storage.deleteEntry(messages_check.returnSelectedItem());     // Delete message if in the popup state
+                msg_storage.reorganize();                                         // Reorganize list to avoid empty spot in the middle
                 messages_check.current_sub_state = messages_check.Substate::list; // Return to list state
-                messages_check.updateCheckMessages(); // Force update to make popup disappear instantly
+                messages_check.updateCheckMessages();                             // Force update to make popup disappear instantly
             }
         }
 
@@ -325,4 +326,15 @@ void loop() {
     btn_left_pressed = false;
     btn_right_pressed = false;
     btn_right_long_pressed = false;
+
+    // Check for emergency messages and set to pop up if there is one
+    if (!emergency_displayed) {
+        if (msg_storage.returnEmergencySlot() != -1) {
+            emergency_displayed = true;
+            current_state = check_messages;
+            messages_check.current_sub_state = messages_check.Substate::info_popup;
+            messages_check.setSelectedItem(msg_storage.returnEmergencySlot());
+            messages_check.updateInfoPanel(); /// Force update to show instantly
+        }
+    }
 }
