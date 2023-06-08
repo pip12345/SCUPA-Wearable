@@ -611,7 +611,7 @@ void DrawCheckMessages::updateCheckMessages() {
             if (msg_storage.returnEntry(i).emergency) {
                 tft.setTextColor(ST77XX_RED);
             }
-            
+
             tft.println(msg_storage.returnEntry(i).text);
         }
     }
@@ -711,14 +711,12 @@ int DrawCheckMessages::returnSelectedItem() {
     return selected_item;
 }
 
-void DrawCheckMessages::setSelectedItem(int value)
-{
+void DrawCheckMessages::setSelectedItem(int value) {
     if (value >= 0 && value <= MESSAGE_STORAGE_SLOTS) {
         selected_item = value;
     }
 }
 
-/////////////////////////////////////////////// TO DO /////////////////////////////////////////////////////////
 void DrawSendMessage::loopSendMessage() {
     current_time = millis();
     if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
@@ -732,7 +730,7 @@ void DrawSendMessage::updateSendMessage() {
 
     // Draw block for currently selected menu item
     // Always resets back to the first location when going to the next page
-    tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + (MENU_SPACING * selected_item), 310, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
+    tft.fillRoundRect(0, 18 - ITEM_BORDER_SIZE + (MENU_SPACING * selected_item), TFT_X, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
 
     // Draw Text
     tft.setTextWrap(false); // Disable text wrap because it may screw with the element positioning in the menu
@@ -742,8 +740,7 @@ void DrawSendMessage::updateSendMessage() {
     for (int i = 0; i <= MAX_MENU_ITEMS; i++) {
         if (i < MESSAGE_DESCRIPTION_SLOTS) {
             tft.setCursor(0, 20 + (MENU_SPACING * i));
-            tft.print("SEND ");
-            tft.print(" - ");
+            tft.print("SEND: ");
             tft.println(msg_storage.message_descriptions[i]);
         }
     }
@@ -757,6 +754,24 @@ void DrawSendMessage::updateSendMessage() {
     tft.setTextColor(ST77XX_WHITE);
 }
 
+void DrawSendMessage::upMenu() {
+    if (selected_item > 0 && selected_item <= MAX_MENU_ITEMS) {
+        selected_item -= 1;
+        updateSendMessage();
+    }
+}
+
+void DrawSendMessage::downMenu() {
+    if (selected_item >= 0 && selected_item < MAX_MENU_ITEMS) {
+        selected_item += 1;
+        updateSendMessage();
+    }
+}
+
+int DrawSendMessage::returnSelectedItem() {
+    return selected_item;
+}
+
 void DrawSendEmergency::loopSendEmergency() {
     current_time = millis();
     if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
@@ -766,4 +781,48 @@ void DrawSendEmergency::loopSendEmergency() {
 }
 
 void DrawSendEmergency::updateSendEmergency() {
+    tft.fillScreen(BACKGROUND_COLOR); // Clear screen
+
+    // Draw block for currently selected menu item
+    // Always resets back to the first location when going to the next page
+    tft.fillRoundRect(0, 18 - ITEM_BORDER_SIZE + (MENU_SPACING * selected_item), TFT_X, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
+
+    // Draw Text
+    tft.setTextWrap(false); // Disable text wrap because it may screw with the element positioning in the menu
+    tft.setTextColor(ST77XX_ORANGE);
+    tft.setTextSize(2); // 12*16
+
+    for (int i = 0; i <= MAX_MENU_ITEMS; i++) {
+        if (i < MESSAGE_DESCRIPTION_SLOTS) {
+            tft.setCursor(0, 20 + (MENU_SPACING * i));
+            tft.print("SEND: ");
+            tft.println(msg_storage.emergency_descriptions[i]);
+        }
+    }
+    tft.setTextWrap(true);
+    tft.setTextSize(1);
+
+    // Top of screen info that shows currently entered menu option
+    tft.setCursor(0, 0);
+    tft.setTextColor(ST77XX_RED);
+    tft.println("SEND EMERGENCY MESSAGE");
+    tft.setTextColor(ST77XX_WHITE);
+}
+
+void DrawSendEmergency::upMenu() {
+    if (selected_item > 0 && selected_item <= MAX_MENU_ITEMS) {
+        selected_item -= 1;
+        updateSendEmergency();
+    }
+}
+
+void DrawSendEmergency::downMenu() {
+    if (selected_item >= 0 && selected_item < MAX_MENU_ITEMS) {
+        selected_item += 1;
+        updateSendEmergency();
+    }
+}
+
+int DrawSendEmergency::returnSelectedItem() {
+    return selected_item;
 }

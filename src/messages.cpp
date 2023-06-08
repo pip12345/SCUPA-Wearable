@@ -44,7 +44,7 @@ MessageStorage::MessageStorage() {
     emergency_descriptions[4] = "Oxygen low!";
     emergency_descriptions[5] = "Lost!";
     emergency_descriptions[6] = "Hurt!";
-    emergency_descriptions[7] = "Equipment malfunction!";
+    emergency_descriptions[7] = "Equipment problems!";
     emergency_descriptions[8] = "Dangerous animal!";
     emergency_descriptions[9] = "Where are you?";
     emergency_descriptions[10] = "Cold!";

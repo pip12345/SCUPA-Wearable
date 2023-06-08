@@ -39,6 +39,6 @@ class GpsStorage {
 
 /*
 !!!!!!!!!!!!!!!!!!!!! TO DO !!!!!!!!!!!!!!!!!!!!!!!!!
-GpsStorage and other relevant data needs to be stored on the EEPROM or SD card
+GpsStorage arr and other relevant data needs to be stored on the EEPROM or SD card
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 */

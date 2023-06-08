@@ -92,7 +92,7 @@ class DrawMap {
     const char RANGE_CIRCLE_RAD_CLOSE = 50; // char if value is less than 127
     const char RANGE_CIRCLE_RAD_MEDIUM = 100;
 
-    int current_time{}; // Used for time-based actions
+    int current_time{}; // Used for refreshing the loop
     int previous_time{};
     const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
 };
@@ -101,7 +101,7 @@ class DrawMenu {
   public:
     void loopMenu(); // runs updateMenu() every set UPDATE_INTERVAL millsieconds
     void updateMenu();
-    
+
     void upMenu();
     void downMenu();
 
@@ -114,7 +114,7 @@ class DrawMenu {
 
     int selected_item{}; // Currently selected menu item in the menu
 
-    int current_time{}; // Used for time-based actions
+    int current_time{}; // Used for refreshing the loop
     int previous_time{};
     const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
 };
@@ -155,7 +155,7 @@ class DrawBookmarks {
     int current_page{};         // current page of MAX_MENU_ITEMS bookmarks being displayed on the menu, first page = 0
 
     // State machine within loopBookmarks() handles subwindows
-    int current_time{}; // Used for time-based actions
+    int current_time{}; // Used for refreshing the loop
     int previous_time{};
     const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
 };
@@ -190,12 +190,10 @@ class DrawCheckMessages {
     int selected_description{}; // Currently selected description item in the add new bookmark menu
     int current_page{};         // current page of MAX_MENU_ITEMS bookmarks being displayed on the menu, first page = 0
 
-    int current_time{}; // Used for time-based actions
+    int current_time{}; // Used for refreshing the loop
     int previous_time{};
     const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
 };
-
-//// TO IMPLEMENT BELOW ////
 
 class DrawSendMessage {
   public:
@@ -211,14 +209,15 @@ class DrawSendMessage {
     const int MENU_SPACING = 18;
     const int MAX_MENU_ITEMS = 11; // show x+1 items at once (11 is 12 being shown)
     const int ITEM_BORDER_SIZE = 2;
-    const int INFO_SIZE = 40;
 
     int selected_item{}; // Currently selected menu item in the menu
 
-    int current_time{}; // Used for time-based actions
+    int current_time{}; // Used for refreshing the loop
     int previous_time{};
     const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
 };
+
+//// TO IMPLEMENT BELOW ////
 
 class DrawSendEmergency {
   public:
@@ -231,9 +230,13 @@ class DrawSendEmergency {
     int returnSelectedItem();
 
   private:
+    const int MENU_SPACING = 18;
+    const int MAX_MENU_ITEMS = 11; // show x+1 items at once (11 is 12 being shown)
+    const int ITEM_BORDER_SIZE = 2;
+
     int selected_item{}; // Currently selected menu item in the menu
 
-    int current_time{}; // Used for time-based actions
+    int current_time{}; // Used for refreshing the loop
     int previous_time{};
     const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
 };

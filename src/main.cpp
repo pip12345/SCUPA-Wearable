@@ -138,7 +138,7 @@ void loop() {
 
         if (btn_right_pressed) {
             // something here still?
-            msg_storage.addEmergencyNext("EMERGENCY - VERY IMPORTANT EMERGENCY MESSAGE OH MY GOD"); // debug
+            // msg_storage.addEmergencyNext("EMERGENCY - VERY IMPORTANT EMERGENCY MESSAGE OH MY GOD"); // debug
         }
 
         break;
@@ -286,9 +286,11 @@ void loop() {
         messages_send.loopSendMessage();
 
         if (btn_up_pressed) {
+            messages_send.upMenu();
         }
 
         if (btn_down_pressed) {
+            messages_send.downMenu();
         }
 
         if (btn_left_pressed) {
@@ -297,15 +299,22 @@ void loop() {
         }
 
         if (btn_right_pressed) {
+            // Send currently selected item
+
+            // TO DO: ADD CODE HERE TO ACTUALLY SEND IT
+            Serial.print("Send message: ");
+            Serial.println(msg_storage.message_descriptions[messages_send.returnSelectedItem()]);
         }
         break;
     case send_emergency:
         messages_emergency_send.loopSendEmergency();
 
         if (btn_up_pressed) {
+            messages_emergency_send.upMenu();
         }
 
         if (btn_down_pressed) {
+            messages_emergency_send.downMenu();
         }
 
         if (btn_left_pressed) {
@@ -314,6 +323,11 @@ void loop() {
         }
 
         if (btn_right_pressed) {
+            // Send currently selected item
+            
+            // TO DO: ADD CODE HERE TO ACTUALLY SEND IT
+            Serial.print("Send message: ");
+            Serial.println(msg_storage.emergency_descriptions[messages_emergency_send.returnSelectedItem()]);
         }
         break;
     default:
@@ -331,6 +345,8 @@ void loop() {
     if (!emergency_displayed) {
         if (msg_storage.returnEmergencySlot() != -1) {
             emergency_displayed = true;
+
+            // Go to pop up state and pop up the message
             current_state = check_messages;
             messages_check.current_sub_state = messages_check.Substate::info_popup;
             messages_check.setSelectedItem(msg_storage.returnEmergencySlot());
