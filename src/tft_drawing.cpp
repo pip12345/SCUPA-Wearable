@@ -507,11 +507,11 @@ void DrawBookmarks::upMenu() {
             selected_item -= 1;
 
             /* We can calculate the current page by rounding down
-            selected_item, then dividing it by 11.
-            We do that because there are 11 unique elements per page since the last
+            selected_item, then dividing it by MAX_MENU_ITEMS.
+            We do that because there are MAX_MENU_ITEMS unique elements per page since the last
             element always gets redrawn at the top of the next page. */
 
-            current_page = (float)(int)(selected_item + 0.5) / 11; // use datatype rounding down trick
+            current_page = (float)(int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use datatype rounding down trick
             Serial.print("selected_item: ");
             Serial.println(selected_item);
             Serial.print("current_page: ");
@@ -539,11 +539,11 @@ void DrawBookmarks::downMenu() {
             selected_item += 1;
 
             /* We can calculate the current page by rounding down
-            selected_item, then dividing it by 11.
-            We do that because there are 11 unique elements per page since the last
+            selected_item, then dividing it by MAX_MENU_ITEMS.
+            We do that because there are MAX_MENU_ITEMS unique elements per page since the last
             element always gets redrawn at the top of the next page. */
 
-            current_page = (int)(selected_item + 0.5) / 11; // use datatype rounding down trick
+            current_page = (int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use datatype rounding down trick
             Serial.print("selected_item: ");
             Serial.println(selected_item);
             Serial.print("current_page: ");
@@ -674,11 +674,11 @@ void DrawCheckMessages::upMenu() {
         selected_item -= 1;
 
         /* We can calculate the current page by rounding down
-        selected_item, then dividing it by 11.
-        We do that because there are 11 unique elements per page since the last
+        selected_item, then dividing it by MAX_MENU_ITEMS.
+        We do that because there are MAX_MENU_ITEMS unique elements per page since the last
         element always gets redrawn at the top of the next page. */
 
-        current_page = (float)(int)(selected_item + 0.5) / 11; // use datatype rounding down trick
+        current_page = (float)(int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use datatype rounding down trick
         Serial.print("selected_item: ");
         Serial.println(selected_item);
         Serial.print("current_page: ");
@@ -693,11 +693,11 @@ void DrawCheckMessages::downMenu() {
         selected_item += 1;
 
         /* We can calculate the current page by rounding down
-        selected_item, then dividing it by 11.
-        We do that because there are 11 unique elements per page since the last
+        selected_item, then dividing it by MAX_MENU_ITEMS.
+        We do that because there are MAX_MENU_ITEMS unique elements per page since the last
         element always gets redrawn at the top of the next page. */
 
-        current_page = (int)(selected_item + 0.5) / 11; // use datatype rounding down trick
+        current_page = (int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use datatype rounding down trick
         Serial.print("selected_item: ");
         Serial.println(selected_item);
         Serial.print("current_page: ");
