@@ -1,7 +1,16 @@
 #include "Button2.h"
 #include "tft_drawing.h"
 #include <Arduino.h>
+#include <AsyncElegantOTA.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 #include <SPI.h>
+
+// Web server for Over The Air uploading, DO NOT TOUCH OR YOU BREAK OTA //
+const char *ssid = "SCUPA Wearable";
+const char *password = "stokkink";
+AsyncWebServer server(80);
+
 
 // Button pins
 #define UP_PIN 33
@@ -56,6 +65,23 @@ void btn_longclick(Button2 &btn) {
 
 void setup() {
     Serial.begin(9600);
+
+    //////////////// OTA Server setup /////////////////////
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(ssid, password);
+    Serial.print("AP started: ");
+    Serial.println(ssid);
+    Serial.print("IP address: ");
+    Serial.println(WiFi.softAPIP());
+
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/plain", "Hi! Go to <this_ip>/update to upload files!");
+    });
+
+    AsyncElegantOTA.begin(&server); // Start ElegantOTA
+    server.begin();
+    Serial.println("HTTP server started");
+    /////////^ DO NOT TOUCH OR YOU BREAK OTA ^///////////////
 
     btn_up.begin(UP_PIN);
     btn_up.setPressedHandler(btn_pressed);
@@ -324,7 +350,7 @@ void loop() {
 
         if (btn_right_pressed) {
             // Send currently selected item
-            
+
             // TO DO: ADD CODE HERE TO ACTUALLY SEND IT
             Serial.print("Send message: ");
             Serial.println(msg_storage.emergency_descriptions[messages_emergency_send.returnSelectedItem()]);

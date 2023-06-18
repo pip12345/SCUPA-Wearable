@@ -43,3 +43,5 @@ Runs on ESP32 with platformIO.
 * Adafruit_GFX: https://github.com/adafruit/Adafruit-GFX-Library
 * Adafruit_ST7789: https://github.com/adafruit/Adafruit-ST7735-Library/tree/master
 * Button2: https://github.com/LennartHennigs/Button2
+* ESPAsyncWebServer: https://github.com/me-no-dev/ESPAsyncWebServer
+* AsyncElegantOTA: https://github.com/ayushsharma82/AsyncElegantOTA
