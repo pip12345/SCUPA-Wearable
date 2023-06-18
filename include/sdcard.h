@@ -20,25 +20,23 @@ class SdCardController {
   public:
     // GPS Storage Arr
     // Write or read contents of the arr
-      // Functions that call a writeGpsArrayToSD:
-      // gps_storage.AddBookmark()
-      // gps_storage.DeleteBookmark()
-      
+    // Functions that call a writeGpsArrayToSD:
+    // gps_storage.AddBookmark()
+    // gps_storage.DeleteBookmark()
+
     void writeGpsArrayToSD(GpsCoordinates *arr);
     void readGpsArrayFromSD(GpsCoordinates *arr);
     void readGpsDescriptionsFromSD(String *descriptions);
 
-
-
-    /* Below is scrapped for now due to the dirty SPI workaround */ 
+    /* Below is scrapped for now due to the dirty SPI workaround */
 
     // MessageStorage Arr
     // Write or read contents of the arr
-      // Functions that call a writeMsgArrayToSD:
-      // msg_storage.addEntryNext()
-      // msg_storage.addEmergencyNext()
-      // msg_storage.deleteEntry()
-      // msg_storage.deleteAll()
+    // Functions that call a writeMsgArrayToSD:
+    // msg_storage.addEntryNext()
+    // msg_storage.addEmergencyNext()
+    // msg_storage.deleteEntry()
+    // msg_storage.deleteAll()
 
     // void writeMsgArrayToSD(MessageEntry *arr);
     // void readMsgArrayFromSD(MessageEntry *arr);

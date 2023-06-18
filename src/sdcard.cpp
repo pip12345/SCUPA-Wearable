@@ -6,11 +6,11 @@ void SdCardController::writeGpsArrayToSD(GpsCoordinates *arr) {
 
     /* 
     This is the nastiest code ever written, a short explanation of this crime:
-    
+
         The TFT library tries to hijack the SPI and run it at a higher frequency, therefore we don't init the SD card until 
-         we need it as it will also take control of the SPI hardware.
+         we need to use it, as it will also take control of the SPI hardware.
         After having used the SD card, the SD card is closed and then the TFT init runs again to restart the SPI for the TFT.
-        This will turn off the screen for about a second after every read/write.
+        This will unfortunately turn off the screen for about a second after every read/write.
     */
 
     if (!SD.begin(SD_CS)) {
@@ -53,10 +53,13 @@ void SdCardController::readGpsArrayFromSD(GpsCoordinates *arr) {
 
     /* 
     This is the nastiest code ever written, a short explanation of this crime:
+
         The TFT library tries to hijack the SPI and run it at a higher frequency, therefore we don't init the SD card until 
-        we need it as it will also take control of the SPI hardware.
-        After done reading/writing, the SD card is closed and then the TFT init runs again to restart the SPI for the TFT
+         we need to use it, as it will also take control of the SPI hardware.
+        After having used the SD card, the SD card is closed and then the TFT init runs again to restart the SPI for the TFT.
+        This will unfortunately turn off the screen for about a second after every read/write.
     */
+
 
     if (!SD.begin(SD_CS)) {
         sd_init_failed = true;

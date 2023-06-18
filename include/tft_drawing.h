@@ -69,7 +69,6 @@ class DrawController {
 
     void init();
 
-
     void clearAll();
     void resetTextToDefault();
 };
