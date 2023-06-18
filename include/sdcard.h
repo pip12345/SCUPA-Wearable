@@ -26,7 +26,10 @@ class SdCardController {
 
     void writeGpsArrayToSD(GpsCoordinates *arr);
     void readGpsArrayFromSD(GpsCoordinates *arr);
+
     void readGpsDescriptionsFromSD(String *descriptions);
+    void readMsgDescriptionsFromSD(String *message_descriptions);
+    void readMsgEmergencyDescriptionsFromSD(String *emergency_descriptions);
 
     /* Below is scrapped for now due to the dirty SPI workaround */
 
@@ -40,8 +43,6 @@ class SdCardController {
 
     // void writeMsgArrayToSD(MessageEntry *arr);
     // void readMsgArrayFromSD(MessageEntry *arr);
-    // void readMsgDescriptionsFromSD(String *message_descriptions);
-    // void readMsgEmergencyDescriptionsFromSD(String *emergency_descriptions);
 
     bool sd_init_failed{false}; // Indicates if SD card failed to get accessed
 };

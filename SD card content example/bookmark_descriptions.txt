@@ -1,0 +1,12 @@
+Starting Location|
+Boat|
+Rendezvous Point|
+Sea Horses|
+Coral|
+Shipwreck|
+Rock Formation|
+Cavern|
+Interest 1|
+Interest 2|
+Interest 3|
+Interest 4|

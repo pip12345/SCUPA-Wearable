@@ -348,10 +348,6 @@ void DrawBookmarks::loopBookmarks() {
             break;
         case add_bookmark:
             updateAddNewBookmarkMenu();
-            Serial.print("selected_item: ");
-            Serial.println(selected_item);
-            Serial.print("selected_description: ");
-            Serial.println(selected_description);
         default:
             break;
         }
@@ -514,9 +510,6 @@ void DrawBookmarks::upMenu() {
         // since we don't want to change the selected item in the main list while scrolling descriptions
         if (selected_description > 0 && selected_description < MAX_MENU_ITEMS) {
             selected_description -= 1;
-            Serial.print("selected_description: ");
-            Serial.println(selected_description);
-
             updateAddNewBookmarkMenu();
         }
     } else {
@@ -529,10 +522,6 @@ void DrawBookmarks::upMenu() {
             element always gets redrawn at the top of the next page. */
 
             current_page = (float)(int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use datatype rounding down trick
-            Serial.print("selected_item: ");
-            Serial.println(selected_item);
-            Serial.print("current_page: ");
-            Serial.println(current_page);
 
             updateBookmarks();
         }
@@ -546,8 +535,6 @@ void DrawBookmarks::downMenu() {
         // since we don't want to change the selected item in the main list while scrolling descriptions
         if (selected_description >= 0 && selected_description < (MAX_MENU_ITEMS - 1)) {
             selected_description += 1;
-            Serial.print("selected_description: ");
-            Serial.println(selected_description);
 
             updateAddNewBookmarkMenu();
         }
@@ -561,10 +548,6 @@ void DrawBookmarks::downMenu() {
             element always gets redrawn at the top of the next page. */
 
             current_page = (int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use datatype rounding down trick
-            Serial.print("selected_item: ");
-            Serial.println(selected_item);
-            Serial.print("current_page: ");
-            Serial.println(current_page);
 
             updateBookmarks();
         }
@@ -696,10 +679,6 @@ void DrawCheckMessages::upMenu() {
         element always gets redrawn at the top of the next page. */
 
         current_page = (float)(int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use datatype rounding down trick
-        Serial.print("selected_item: ");
-        Serial.println(selected_item);
-        Serial.print("current_page: ");
-        Serial.println(current_page);
 
         updateCheckMessages();
     }
@@ -715,10 +694,6 @@ void DrawCheckMessages::downMenu() {
         element always gets redrawn at the top of the next page. */
 
         current_page = (int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use datatype rounding down trick
-        Serial.print("selected_item: ");
-        Serial.println(selected_item);
-        Serial.print("current_page: ");
-        Serial.println(current_page);
 
         updateCheckMessages();
     }

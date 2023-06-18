@@ -46,22 +46,17 @@ int current_state = map_display;
 void btn_pressed(Button2 &btn) {
     if (btn == btn_up) {
         btn_up_pressed = true;
-        Serial.println("up pressed");
     } else if (btn == btn_down) {
         btn_down_pressed = true;
-        Serial.println("down pressed");
     } else if (btn == btn_left) {
         btn_left_pressed = true;
-        Serial.println("left pressed");
     } else {
         btn_right_pressed = true;
-        Serial.println("right pressed");
     }
 }
 
 void btn_longclick(Button2 &btn) {
     btn_right_long_pressed = true;
-    Serial.println("right longclick");
 }
 
 void setup() {
@@ -119,6 +114,9 @@ void setup() {
 
     // Read Current data from SD card
     sd_controller.readGpsArrayFromSD(gps_storage.arr);
+    sd_controller.readGpsDescriptionsFromSD(gps_storage.descriptions);
+    sd_controller.readMsgDescriptionsFromSD(msg_storage.message_descriptions);
+    sd_controller.readMsgEmergencyDescriptionsFromSD(msg_storage.emergency_descriptions);
 
     // Set this location as the starting location and save it
     gps_storage.addBookmark(gps_storage.returnUser().latitude, gps_storage.returnUser().longitude, gps_storage.returnUser().depth, "[Start Location]", 1);
@@ -220,7 +218,6 @@ void loop() {
             if (bookmarks.current_sub_state == bookmarks.Substate::list) {
                 if (bookmarks.returnSelectedItem() == 0) {
                     gps_map.setCourse(0); // Remove current course
-                    Serial.println("Deleted course");
                 } else {
                     if ((gps_storage.returnBookmark(bookmarks.returnSelectedItem()).latitude != 404) && (gps_storage.returnBookmark(bookmarks.returnSelectedItem()).longitude != 404)) {
                         // If right pressed on an existing entry, open info popup
