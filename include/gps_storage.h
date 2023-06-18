@@ -36,8 +36,7 @@ class GpsStorage {
     GpsCoordinates returnUser();                                  // Return user coordinates
 
     String descriptions[GPS_DESCRIPTION_STRINGS]{}; // Holds preprogrammed descriptions. Stretch goal: read this from SD card instead?
-    
-  private:
+
     GpsCoordinates arr[GPS_STORAGE_SLOTS]{}; // Holds bookmarked GPS coordinates
 };
 

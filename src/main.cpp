@@ -1,22 +1,22 @@
 #include "Button2.h"
+#include "sdcard.h"
 #include "tft_drawing.h"
 #include <Arduino.h>
-#include <AsyncElegantOTA.h>
-#include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h>
+// #include <AsyncElegantOTA.h>
+// #include <AsyncTCP.h>
+// #include <ESPAsyncWebServer.h>
 #include <SPI.h>
 
 // Web server for Over The Air uploading, DO NOT TOUCH OR YOU BREAK OTA //
-const char *ssid = "SCUPA Wearable";
-const char *password = "stokkink";
-AsyncWebServer server(80);
-
+// const char *ssid = "SCUPA Wearable";
+// const char *password = "stokkink";
+// AsyncWebServer server(80);
 
 // Button pins
 #define UP_PIN 33
 #define DOWN_PIN 25
 #define LEFT_PIN 26
-#define RIGHT_PIN 19
+#define RIGHT_PIN 21
 
 DrawController screen;
 DrawMap gps_map;
@@ -25,6 +25,7 @@ DrawBookmarks bookmarks;
 DrawCheckMessages messages_check;
 DrawSendMessage messages_send;
 DrawSendEmergency messages_emergency_send;
+SdCardController sd_controller;
 
 GpsStorage gps_storage; // stores GPS coordinates that get drawn on the screen
 MessageStorage msg_storage;
@@ -67,20 +68,20 @@ void setup() {
     Serial.begin(9600);
 
     //////////////// OTA Server setup /////////////////////
-    WiFi.mode(WIFI_AP);
-    WiFi.softAP(ssid, password);
-    Serial.print("AP started: ");
-    Serial.println(ssid);
-    Serial.print("IP address: ");
-    Serial.println(WiFi.softAPIP());
+    // WiFi.mode(WIFI_AP);
+    // WiFi.softAP(ssid, password);
+    // Serial.print("AP started: ");
+    // Serial.println(ssid);
+    // Serial.print("IP address: ");
+    // Serial.println(WiFi.softAPIP());
 
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/plain", "Hi! Go to <this_ip>/update to upload files!");
-    });
+    // server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    //     request->send(200, "text/plain", "Hi! Go to <this_ip>/update to upload files!");
+    // });
 
-    AsyncElegantOTA.begin(&server); // Start ElegantOTA
-    server.begin();
-    Serial.println("HTTP server started");
+    // AsyncElegantOTA.begin(&server); // Start ElegantOTA
+    // server.begin();
+    // Serial.println("HTTP server started");
     /////////^ DO NOT TOUCH OR YOU BREAK OTA ^///////////////
 
     btn_up.begin(UP_PIN);
@@ -96,22 +97,32 @@ void setup() {
 
     /////// DEBUG //////////
     // Distance between userlocation and seahorses is 139.85 m
-    gps_storage.setUser(12.195722, -69.046859, 10);
-    gps_storage.addBookmark(12.194572, -69.047380, 12, "Sea horses", 1);
-    gps_storage.addBookmark(12.195009, -69.046143, 31, "Shipwreck", 2);
-    gps_storage.addBookmark(12.197472, -69.047321, 0, "Cool boat", 3);
-    gps_storage.addBookmark(12.196264, -69.051067, 0, "Beach", 4);
-    for (int i = 5; i < 32; i++) {
-        gps_storage.addBookmark(10 + i, 10 + i, 0, "Filler", i);
-    }
-    gps_storage.addBookmark(69, 69, 0, "This was painful", 63);
+    // gps_storage.setUser(12.195722, -69.046859, 10);
+    // gps_storage.addBookmark(12.194572, -69.047380, 12, "Sea horses", 2);
+    // gps_storage.addBookmark(12.195009, -69.046143, 31, "Shipwreck", 3);
+    // gps_storage.addBookmark(12.197472, -69.047321, 0, "Cool boat", 4);
+    // gps_storage.addBookmark(12.196264, -69.051067, 0, "Beach", 5);
+    // for (int i = 5; i < 32; i++) {
+    //     gps_storage.addBookmark(10 + i, 10 + i, 0, "Filler", i);
+    // }
+    // gps_storage.addBookmark(69, 69, 0, "This was painful", 63);
+    // /////// DEBUG //////////
+    // msg_storage.addEntryNext("Cool message 1");
+    // msg_storage.addEntryNext("Cool message 2");
+    // msg_storage.addEntryNext("I am in excruciating pain without any indication if it will stop any time soon, please send help");
+    // msg_storage.addEntryNext("Cool message 3");
+    // msg_storage.addEntryNext("Cool last message");
     /////// DEBUG //////////
-    msg_storage.addEntryNext("Cool message 1");
-    msg_storage.addEntryNext("Cool message 2");
-    msg_storage.addEntryNext("I am in excruciating pain without any indication if it will stop any time soon, please send help");
-    msg_storage.addEntryNext("Cool message 3");
-    msg_storage.addEntryNext("Cool last message");
-    /////// DEBUG //////////
+
+    // RUN GPS AND DEPTH SENSOR HERE ONCE FOR STARTING LOCATION
+    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    // Read Current data from SD card
+    sd_controller.readGpsArrayFromSD(gps_storage.arr);
+
+    // Set this location as the starting location and save it
+    gps_storage.addBookmark(gps_storage.returnUser().latitude, gps_storage.returnUser().longitude, gps_storage.returnUser().depth, "[Start Location]", 1);
+    sd_controller.writeGpsArrayToSD(gps_storage.arr);
 
     Serial.println("Setup finished");
 }
@@ -124,6 +135,7 @@ void loop() {
 
     switch (current_state) {
     case main_menu:
+
         menu.loopMenu();
 
         if (btn_up_pressed) {
@@ -145,6 +157,7 @@ void loop() {
         }
         break;
     case map_display:
+
         gps_map.loopMap();
 
         if (btn_up_pressed) {
@@ -163,7 +176,6 @@ void loop() {
         }
 
         if (btn_right_pressed) {
-            // something here still?
             // msg_storage.addEmergencyNext("EMERGENCY - VERY IMPORTANT EMERGENCY MESSAGE OH MY GOD"); // debug
         }
 
@@ -229,6 +241,7 @@ void loop() {
                 bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
             } else if (bookmarks.current_sub_state == bookmarks.Substate::add_bookmark) {
                 bookmarks.bookmarkCurrentLocation();
+                sd_controller.writeGpsArrayToSD(gps_storage.arr); // Save new location to SD card
 
                 // return to list
                 bookmarks.current_sub_state = bookmarks.Substate::list;
@@ -247,6 +260,8 @@ void loop() {
                 // If long pressed again while in the warning popup state
             } else if (bookmarks.current_sub_state == bookmarks.Substate::warning_popup) {
                 gps_storage.deleteBookmark(bookmarks.returnSelectedItem()); // Delete GPS if in the popup state
+                sd_controller.writeGpsArrayToSD(gps_storage.arr);           // Save change to SD card
+
                 bookmarks.current_sub_state = bookmarks.Substate::list;
                 bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
             }

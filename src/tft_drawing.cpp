@@ -1,14 +1,13 @@
 #include "tft_drawing.h"
 
-extern GpsStorage gps_storage;     // Requires gps_storage to be declared in main
-extern MessageStorage msg_storage; // Requires msg_storage to be declared in main
+extern GpsStorage gps_storage;         // Requires gps_storage to be declared in main
+extern MessageStorage msg_storage;     // Requires msg_storage to be declared in main
+extern SdCardController sd_controller; // Requires sd_controller to be declared in main
 
 // Inits tft in this cpp file on creation of the drawcontroller, use this for all global stuff
 // tft commands such as tft.drawPixel ONLY WORK inside this .cpp file
 DrawController::DrawController() {
-    tft.init(TFT_Y, TFT_X);
-    tft.setSPISpeed(40000000);        // DANGER MIGHT BREAK STUFF
-    tft.setRotation(1);               // Set screen in landscape mode
+    init();
     tft.fillScreen(BACKGROUND_COLOR); // Wipe whole screen
     tft.setTextSize(1);
     tft.setTextColor(ST77XX_WHITE);
@@ -201,6 +200,14 @@ void DrawMap::drawText() {
         tft.print("UNREAD MESSAGES");
         tft.setTextColor(ST77XX_WHITE);
     }
+
+    // Draw text indicating SD card init failed
+    if (sd_controller.sd_init_failed) {
+        tft.setTextColor(ST77XX_RED);
+        tft.setCursor(0, TFT_Y - 30);
+        tft.print("ERROR: SD CARD INIT FAILED");
+        tft.setTextColor(ST77XX_WHITE);
+    }
 }
 
 // Draw all GPS coordinates stored in the GpsStorage object except the user itself
@@ -257,9 +264,19 @@ void DrawMenu::updateMenu() {
     // Draw block for currently selected menu item
     tft.fillRoundRect(5, 18 - ITEM_BORDER_SIZE + (MENU_SPACING * selected_item), 280, 16 + (ITEM_BORDER_SIZE * 2), 5, ST77XX_BLUE);
 
-    // Draw Text
     tft.setTextWrap(true);
     tft.setTextColor(ST77XX_WHITE);
+    tft.setTextSize(1);
+
+    // Draw SD init error
+    if (sd_controller.sd_init_failed) {
+        tft.setCursor(10, 0);
+        tft.setTextColor(ST77XX_RED);
+        tft.print("ERROR: SD CARD INIT FAILED");
+        tft.setTextColor(ST77XX_WHITE);
+    }
+
+    // Draw Menu Text
     tft.setTextSize(2); // 12*16
 
     tft.setCursor(0, 20);
@@ -825,4 +842,10 @@ void DrawSendEmergency::downMenu() {
 
 int DrawSendEmergency::returnSelectedItem() {
     return selected_item;
+}
+
+void DrawController::init() {
+    tft.init(TFT_Y, TFT_X);
+    tft.setSPISpeed(40000000); // DANGER MIGHT BREAK STUFF
+    tft.setRotation(1);        // Set screen in landscape mode
 }

@@ -39,6 +39,7 @@ Therefore, all calls to tft must be done in the source file of this header
 #include "gps_storage.h"
 #include "map.h"
 #include "messages.h"
+#include "sdcard.h"
 
 #define TFT_MOSI 23 // DIN on waveshare
 #define TFT_SCK 18  // CLK on waveshare
@@ -65,6 +66,10 @@ static Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 class DrawController {
   public:
     DrawController();
+
+    void init();
+
+
     void clearAll();
     void resetTextToDefault();
 };
