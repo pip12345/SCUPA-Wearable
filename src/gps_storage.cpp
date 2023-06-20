@@ -54,6 +54,21 @@ void GpsStorage::addBookmark(double latitude, double longitude, float depth, Str
     }
 }
 
+void GpsStorage::addBookmarkNext(double latitude, double longitude, float depth, String description) {
+    for (int i = 0; i < GPS_STORAGE_SLOTS; i++) {
+        if (arr[i].latitude == 404 && arr[i].longitude == 404) {
+            addBookmark(latitude, longitude, depth, description, i);
+            break;
+        }
+
+        // If no free spot available, replace last message
+        if (i == (GPS_STORAGE_SLOTS - 1) && (arr[i].latitude != 404 && arr[i].longitude != 404)) {
+            addBookmark(latitude, longitude, depth, description, i);
+            break;
+        }
+    }
+}
+
 void GpsStorage::deleteBookmark(int slot) {
     if (slot >= 1 && slot < GPS_STORAGE_SLOTS) {
         arr[slot] = GpsCoordinates(); // set value back to uninitialized values

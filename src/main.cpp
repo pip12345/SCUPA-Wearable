@@ -1,5 +1,7 @@
 #include "Button2.h"
+#include "communication.h"
 #include "sdcard.h"
+#include "sensors.h"
 #include "tft_drawing.h"
 #include <Arduino.h>
 // #include <AsyncElegantOTA.h>
@@ -18,6 +20,8 @@
 #define LEFT_PIN 26
 #define RIGHT_PIN 21
 
+#define SEND_USER_LOCATION_INTERVAL 30000 // Send user location every 30 seconds
+
 DrawController screen;
 DrawMap gps_map;
 DrawMenu menu;
@@ -26,6 +30,8 @@ DrawCheckMessages messages_check;
 DrawSendMessage messages_send;
 DrawSendEmergency messages_emergency_send;
 SdCardController sd_controller;
+CommHandler communication;
+Sensors sensors;
 
 GpsStorage gps_storage; // stores GPS coordinates that get drawn on the screen
 MessageStorage msg_storage;
@@ -33,6 +39,9 @@ MessageStorage msg_storage;
 Button2 btn_up, btn_down, btn_left, btn_right;
 bool btn_up_pressed{}, btn_down_pressed{}, btn_left_pressed{}, btn_right_pressed{}, btn_right_long_pressed{};
 bool emergency_displayed{}; // Flag used to only display a single emergency message at once
+
+int send_user_loc_current_time{}; // Used for refreshing the loop
+int send_user_loc_previous_time{};
 
 enum State { main_menu,
              map_display,
@@ -60,7 +69,6 @@ void btn_longclick(Button2 &btn) {
 }
 
 void setup() {
-    Serial.begin(9600);
 
     //////////////// OTA Server setup /////////////////////
     // WiFi.mode(WIFI_AP);
@@ -121,8 +129,6 @@ void setup() {
     // Set this location as the starting location and save it
     gps_storage.addBookmark(gps_storage.returnUser().latitude, gps_storage.returnUser().longitude, gps_storage.returnUser().depth, "[Start Location]", 1);
     sd_controller.writeGpsArrayToSD(gps_storage.arr);
-
-    Serial.println("Setup finished");
 }
 
 void loop() {
@@ -338,10 +344,9 @@ void loop() {
 
         if (btn_right_pressed) {
             // Send currently selected item
-
-            // TO DO: ADD CODE HERE TO ACTUALLY SEND IT
-            Serial.print("Send message: ");
-            Serial.println(msg_storage.message_descriptions[messages_send.returnSelectedItem()]);
+            communication.sendMSG(msg_storage.message_descriptions[messages_send.returnSelectedItem()]);
+            // Return to main menu to indicate it has been sent
+            current_state = main_menu;
         }
         break;
     case send_emergency:
@@ -362,10 +367,9 @@ void loop() {
 
         if (btn_right_pressed) {
             // Send currently selected item
-
-            // TO DO: ADD CODE HERE TO ACTUALLY SEND IT
-            Serial.print("Send message: ");
-            Serial.println(msg_storage.emergency_descriptions[messages_emergency_send.returnSelectedItem()]);
+            communication.sendEMR(msg_storage.emergency_descriptions[messages_emergency_send.returnSelectedItem()]);
+            // Return to main menu to indicate it has been sent
+            current_state = main_menu;
         }
         break;
     default:
@@ -390,5 +394,18 @@ void loop() {
             messages_check.setSelectedItem(msg_storage.returnEmergencySlot());
             messages_check.updateInfoPanel(); /// Force update to show instantly
         }
+    }
+
+    // Send user location every SEND_USER_LOCATION_INTERVAL milliseconds
+    send_user_loc_current_time = millis();
+    if (send_user_loc_current_time - send_user_loc_previous_time >= SEND_USER_LOCATION_INTERVAL) {
+        send_user_loc_previous_time = send_user_loc_current_time;
+
+        communication.sendUserGPS();
+    }
+
+    // Check if anything has been received on the UART RX line
+    if (communication.readReceived()) {
+        sd_controller.writeGpsArrayToSD(gps_storage.arr);
     }
 }
