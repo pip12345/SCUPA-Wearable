@@ -15,6 +15,10 @@ struct GpsCoordinates {
     GpsCoordinates();
     GpsCoordinates(double latitude, double longitude, float depth, String description);
     GpsCoordinates(double latitude, double longitude, float depth);
+
+    // sending:   latitude,longitude,depth,description
+    //            12.194572,-69.047380,12,Sea horses
+    //            float,float,int,string
 };
 
 // Stores GPS coordinates in an array with a specific id, id 0 is reserved for the user itself. Bookmark ids go from 1 to GPS_STORAGE_SLOTS (default 64)
@@ -32,8 +36,7 @@ class GpsStorage {
     GpsCoordinates returnUser();                                  // Return user coordinates
 
     String descriptions[GPS_DESCRIPTION_STRINGS]{}; // Holds preprogrammed descriptions. Stretch goal: read this from SD card instead?
-    
-  private:
+
     GpsCoordinates arr[GPS_STORAGE_SLOTS]{}; // Holds bookmarked GPS coordinates
 };
 

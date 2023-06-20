@@ -64,6 +64,8 @@ class MessageStorage {
     String message_descriptions[MESSAGE_DESCRIPTION_SLOTS]{};     // Holds preprogrammed descriptions for sending messages
     String emergency_descriptions[EMERGENCY_DESCRIPTION_SLOTS]{}; // Holds preprogrammed descriptions for sending emergency messages
 
+    MessageEntry arr[MESSAGE_STORAGE_SLOTS]{}; // Array of MessageEntry's that holds all saved messages
+
   private:
     void addEntry(Message msg, int slot);
     void addEntry(String text, int slot);
@@ -72,9 +74,6 @@ class MessageStorage {
     void addEntryNext(Message msg); // Unused
     void addEntryNext(String text, bool emergency);
 
-    
     MessageEntry returnMessageEntry(int slot);
     void addMessageEntry(MessageEntry entry, int slot);
-
-    MessageEntry arr[MESSAGE_STORAGE_SLOTS]{}; // Array of MessageEntry's that holds all saved messages
 };

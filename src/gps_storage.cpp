@@ -22,38 +22,42 @@ GpsCoordinates::GpsCoordinates(double latitude, double longitude, float depth) {
 
 GpsStorage::GpsStorage() {
     // Preprogrammed for now
-    descriptions[0] = "Starting Location";
-    descriptions[1] = "Boat";
-    descriptions[2] = "Rendezvous Point";
-    descriptions[3] = "Sea Horses";
-    descriptions[4] = "Coral";
-    descriptions[5] = "Shipwreck";
-    descriptions[6] = "Rock Formation";
-    descriptions[7] = "Cavern";
-    descriptions[8] = "Interest 1";
-    descriptions[9] = "Interest 2";
-    descriptions[10] = "Interest 3";
-    descriptions[11] = "Interest 4";
+    // descriptions[0] = "Starting Location";
+    // descriptions[1] = "Boat";
+    // descriptions[2] = "Rendezvous Point";
+    // descriptions[3] = "Sea Horses";
+    // descriptions[4] = "Coral";
+    // descriptions[5] = "Shipwreck";
+    // descriptions[6] = "Rock Formation";
+    // descriptions[7] = "Cavern";
+    // descriptions[8] = "Interest 1";
+    // descriptions[9] = "Interest 2";
+    // descriptions[10] = "Interest 3";
+    // descriptions[11] = "Interest 4";
 }
 
 void GpsStorage::addBookmark(GpsCoordinates location, int slot) {
-    if (slot >= 1 && slot < GPS_STORAGE_SLOTS)
+    if (slot >= 1 && slot < GPS_STORAGE_SLOTS) {
         arr[slot] = location;
+    }
 }
 
 void GpsStorage::addBookmark(double latitude, double longitude, float depth, int slot) {
-    if (slot >= 1 && slot < GPS_STORAGE_SLOTS)
+    if (slot >= 1 && slot < GPS_STORAGE_SLOTS) {
         arr[slot] = GpsCoordinates(latitude, longitude, depth);
+    }
 }
 
 void GpsStorage::addBookmark(double latitude, double longitude, float depth, String description, int slot) {
-    if (slot >= 1 && slot < GPS_STORAGE_SLOTS)
+    if (slot >= 1 && slot < GPS_STORAGE_SLOTS) {
         arr[slot] = GpsCoordinates(latitude, longitude, depth, description);
+    }
 }
 
 void GpsStorage::deleteBookmark(int slot) {
-    if (slot >= 1 && slot < GPS_STORAGE_SLOTS)
+    if (slot >= 1 && slot < GPS_STORAGE_SLOTS) {
         arr[slot] = GpsCoordinates(); // set value back to uninitialized values
+    }
 }
 
 GpsCoordinates GpsStorage::returnBookmark(int slot) {
@@ -68,10 +72,12 @@ GpsCoordinates GpsStorage::returnBookmark(int slot) {
 
 void GpsStorage::setUser(GpsCoordinates location) {
     arr[0] = location;
+    arr[0].description = "&USER";
 }
 
 void GpsStorage::setUser(double latitude, double longitude, float depth) {
     arr[0] = GpsCoordinates(latitude, longitude, depth);
+    arr[0].description = "&USER";
 }
 
 GpsCoordinates GpsStorage::returnUser() {

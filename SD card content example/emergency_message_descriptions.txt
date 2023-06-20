@@ -1,0 +1,12 @@
+Help!|
+Partner in trouble!|
+Not feeling well!|
+Stuck!|
+Oxygen low!|
+Lost!|
+Hurt!|
+Equipment problems!|
+Dangerous animal!|
+Where are you?|
+Cold!|
+Sea horses in danger!|
