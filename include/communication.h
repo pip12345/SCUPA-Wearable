@@ -19,18 +19,23 @@ Notes:
 
 -------------------------------------------------------------
     GPS coordinates to/from base station:
+    - Used for sending wearable user location (with added depth information) to base station
+    - Used for base station sending bookmarks to the wearable
 
     |"GPS"|LATITUDE|LONGITUDE|DEPTH|TEXT DESCRIPTION|
 -------------------------------------------------------------
     GPS coordinates sent from buoy to wearable:
+    - Used for updating wearable internal user position when received
 
     |"GPB"|LATITUDE|LONGITUDE|
 -------------------------------------------------------------
     Text messages:
+    - Used for sending text messages from wearable to base station and vice versa
 
     |"MSG"|MESSAGE CONTENTS|
 -------------------------------------------------------------
     Emergency messages:
+    - Used for sending emergency messages from wearable to base station and vice versa
 
     |"EMR"|MESSAGE CONTENTS|
 
