@@ -3,16 +3,23 @@
 #include "sdcard.h"
 #include "sensors.h"
 #include "tft_drawing.h"
-#include <Arduino.h>
-// #include <AsyncElegantOTA.h>
-// #include <AsyncTCP.h>
-// #include <ESPAsyncWebServer.h>
 #include <SPI.h>
+#include <Arduino.h>
 
+//#define INCLUDE_OTA // Uncomment to compile with over-the-air uploading
+
+#ifdef INCLUDE_OTA
+#include <AsyncElegantOTA.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#endif
+
+#ifdef INCLUDE_OTA
 // Web server for Over The Air uploading, DO NOT TOUCH OR YOU BREAK OTA //
-// const char *ssid = "SCUPA Wearable";
-// const char *password = "stokkink";
-// AsyncWebServer server(80);
+const char *ssid = "SCUPA Wearable";
+const char *password = "stokkink";
+AsyncWebServer server(80);
+#endif
 
 // Button pins
 #define UP_PIN 33
@@ -20,7 +27,7 @@
 #define LEFT_PIN 26
 #define RIGHT_PIN 21
 
-#define SEND_USER_LOCATION_INTERVAL 30000 // Send user location every 30 seconds
+#define SEND_USER_LOCATION_INTERVAL 100 // Send user location every 30 seconds 30000
 
 DrawController screen;
 DrawMap gps_map;
@@ -70,22 +77,24 @@ void btn_longclick(Button2 &btn) {
 
 void setup() {
 
+    #ifdef INCLUDE_OTA
     //////////////// OTA Server setup /////////////////////
-    // WiFi.mode(WIFI_AP);
-    // WiFi.softAP(ssid, password);
-    // Serial.print("AP started: ");
-    // Serial.println(ssid);
-    // Serial.print("IP address: ");
-    // Serial.println(WiFi.softAPIP());
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(ssid, password);
+    Serial.print("AP started: ");
+    Serial.println(ssid);
+    Serial.print("IP address: ");
+    Serial.println(WiFi.softAPIP());
 
-    // server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    //     request->send(200, "text/plain", "Hi! Go to <this_ip>/update to upload files!");
-    // });
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/plain", "Hi! Go to <this_ip>/update to upload files!");
+    });
 
-    // AsyncElegantOTA.begin(&server); // Start ElegantOTA
-    // server.begin();
-    // Serial.println("HTTP server started");
+    AsyncElegantOTA.begin(&server); // Start ElegantOTA
+    server.begin();
+    Serial.println("HTTP server started");
     /////////^ DO NOT TOUCH OR YOU BREAK OTA ^///////////////
+    #endif
 
     btn_up.begin(UP_PIN);
     btn_up.setPressedHandler(btn_pressed);
@@ -212,7 +221,7 @@ void loop() {
                 // return to list
                 bookmarks.current_sub_state = bookmarks.Substate::list;
                 bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
-            } else if (bookmarks.current_sub_state = bookmarks.Substate::add_bookmark) {
+            } else if (bookmarks.current_sub_state == bookmarks.Substate::add_bookmark) {
                 // return to list
                 bookmarks.current_sub_state = bookmarks.Substate::list;
                 bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
@@ -303,7 +312,7 @@ void loop() {
         }
 
         if (btn_right_pressed) {
-            if (!messages_check.current_sub_state == messages_check.Substate::warning_popup) {
+            if (messages_check.current_sub_state != messages_check.Substate::warning_popup) {
                 messages_check.current_sub_state = messages_check.Substate::info_popup;
                 messages_check.updateInfoPanel(); /// Force update to show instantly
             }

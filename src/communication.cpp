@@ -5,7 +5,9 @@ extern MessageStorage msg_storage;
 extern Sensors sensors;
 
 CommHandler::CommHandler() {
-    Serial.begin(9600);
+    Serial.begin(baud);
+    pinMode(RTS_PIN, OUTPUT);
+    digitalWrite(RTS_PIN, LOW);
 }
 
 bool CommHandler::readReceived() {
@@ -49,11 +51,30 @@ bool CommHandler::readReceived() {
                 gps_storage.setUser(gpb_lat.toFloat(), gpb_lon.toFloat(), sensors.depth);
             }
         }
+
         Serial.begin(baud); // Flush buffers for new string
         // Serial.println(last_received);
     }
 
     return saveGPStoSD;
+}
+
+void CommHandler::sendBookmarkGPS(int slot) {
+
+    GpsCoordinates bookmark = gps_storage.returnBookmark(slot);
+
+    String latitude = String(bookmark.latitude, 6);
+    String longitude = String(bookmark.longitude, 6);
+    String depth = String(bookmark.depth, 2);
+
+    // |"GPS"|LATITUDE|LONGITUDE|DEPTH|TEXT DESCRIPTION|
+    String send_str = "|GPS|" + latitude + "|" + longitude + "|" + depth + "|" + bookmark.description + "|";
+
+    digitalWrite(RTS_PIN, HIGH);
+    delayMicroseconds(8); // Length of 1 byte
+    Serial.println(send_str);
+    delayMicroseconds(2300); // Length of 256 bytes
+    digitalWrite(RTS_PIN, LOW);
 }
 
 void CommHandler::sendUserGPS() {
@@ -67,17 +88,29 @@ void CommHandler::sendUserGPS() {
     // |"GPS"|LATITUDE|LONGITUDE|DEPTH|TEXT DESCRIPTION|
     String send_str = "|GPS|" + latitude + "|" + longitude + "|" + depth + "|" + user.description + "|";
 
+    digitalWrite(RTS_PIN, HIGH);
+    delayMicroseconds(8);
     Serial.println(send_str);
+    delayMicroseconds(2300);
+    digitalWrite(RTS_PIN, LOW);
 }
 
 void CommHandler::sendMSG(String msg) {
     String send_str = "|MSG|" + msg + "|";
 
+    digitalWrite(RTS_PIN, HIGH);
+    delayMicroseconds(8);
     Serial.println(send_str);
+    delayMicroseconds(2300);
+    digitalWrite(RTS_PIN, LOW);
 }
 
 void CommHandler::sendEMR(String emr_msg) {
     String send_str = "|EMR|" + emr_msg + "|";
 
+    digitalWrite(RTS_PIN, HIGH);
+    delayMicroseconds(8);
     Serial.println(send_str);
+    delayMicroseconds(2300);
+    digitalWrite(RTS_PIN, LOW);
 }

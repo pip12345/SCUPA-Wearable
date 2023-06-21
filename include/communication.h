@@ -5,7 +5,8 @@
 #include "sensors.h"
 #include <Arduino.h>
 
-#define baud 9600
+#define baud 115200
+#define RTS_PIN 32
 
 // Handles receiving and sending of serial messages to buoy
 
@@ -47,6 +48,7 @@ class CommHandler {
     bool readReceived(); // Reads and processes uart messages, outputs true if the SD card needs to save the GPS coordinates again
 
     void sendUserGPS();
+    void sendBookmarkGPS(int slot);
     void sendMSG(String msg);
     void sendEMR(String emr_msg);
 
