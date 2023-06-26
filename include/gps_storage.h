@@ -28,6 +28,7 @@ class GpsStorage {
     void addBookmark(GpsCoordinates location, int slot); // bookmark location to slot 1 to GPS_STORAGE_SLOTS (default 64)
     void addBookmark(double latitude, double longitude, float depth, String description, int slot);
     void addBookmark(double latitude, double longitude, float depth, int slot);
+    void addBookmarkNext(double latitude, double longitude, float depth, String description);
     void deleteBookmark(int slot);           // delete bookmark location in passed slot
     GpsCoordinates returnBookmark(int slot); // return GPS GpsCoordinates of slot
 

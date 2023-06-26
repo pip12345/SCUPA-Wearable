@@ -12,7 +12,7 @@
 #define SD_MISO 19
 #define SD_MOSI 23
 #define SD_SCK 18
-#define SD_CS 22
+#define SD_CS 22//proto: 22 real: 5
 
 #define NR_FLOAT_DIGITS 10
 

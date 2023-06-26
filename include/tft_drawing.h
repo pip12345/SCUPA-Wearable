@@ -42,11 +42,11 @@ Therefore, all calls to tft must be done in the source file of this header
 #include "sdcard.h"
 
 #define TFT_MOSI 23 // DIN on waveshare
-#define TFT_SCK 18  // CLK on waveshare
-#define TFT_CS 16
-#define TFT_RST 17
-#define TFT_DC 32
-#define TFT_BL 27 // Backlight, any pin, just needs to be on
+#define TFT_SCK 18 // CLK on waveshare
+#define TFT_CS 16//proto: 16 real: 25
+#define TFT_RST 17//proto: 17 real: 33
+#define TFT_DC 32//proto: 32 real: 26
+#define TFT_BL 27//proto: 27 real: 17 // Backlight, any pin, just needs to be on
 
 // Coordinates go from X: 0 - 239 and Y: 0 - 319
 #define TFT_Y 240

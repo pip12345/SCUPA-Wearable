@@ -1,22 +1,33 @@
 #include "Button2.h"
+#include "communication.h"
 #include "sdcard.h"
+#include "sensors.h"
 #include "tft_drawing.h"
-#include <Arduino.h>
-// #include <AsyncElegantOTA.h>
-// #include <AsyncTCP.h>
-// #include <ESPAsyncWebServer.h>
 #include <SPI.h>
+#include <Arduino.h>
 
+//#define INCLUDE_OTA // Uncomment to compile with over-the-air uploading
+
+#ifdef INCLUDE_OTA
+#include <AsyncElegantOTA.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#endif
+
+#ifdef INCLUDE_OTA
 // Web server for Over The Air uploading, DO NOT TOUCH OR YOU BREAK OTA //
-// const char *ssid = "SCUPA Wearable";
-// const char *password = "stokkink";
-// AsyncWebServer server(80);
+const char *ssid = "SCUPA Wearable";
+const char *password = "stokkink";
+AsyncWebServer server(80);
+#endif
 
 // Button pins
 #define UP_PIN 33
 #define DOWN_PIN 25
 #define LEFT_PIN 26
 #define RIGHT_PIN 21
+
+#define SEND_USER_LOCATION_INTERVAL 100 // Send user location every 30 seconds 30000
 
 DrawController screen;
 DrawMap gps_map;
@@ -26,6 +37,8 @@ DrawCheckMessages messages_check;
 DrawSendMessage messages_send;
 DrawSendEmergency messages_emergency_send;
 SdCardController sd_controller;
+CommHandler communication;
+Sensors sensors;
 
 GpsStorage gps_storage; // stores GPS coordinates that get drawn on the screen
 MessageStorage msg_storage;
@@ -33,6 +46,9 @@ MessageStorage msg_storage;
 Button2 btn_up, btn_down, btn_left, btn_right;
 bool btn_up_pressed{}, btn_down_pressed{}, btn_left_pressed{}, btn_right_pressed{}, btn_right_long_pressed{};
 bool emergency_displayed{}; // Flag used to only display a single emergency message at once
+
+int send_user_loc_current_time{}; // Used for refreshing the loop
+int send_user_loc_previous_time{};
 
 enum State { main_menu,
              map_display,
@@ -60,24 +76,25 @@ void btn_longclick(Button2 &btn) {
 }
 
 void setup() {
-    Serial.begin(9600);
 
+    #ifdef INCLUDE_OTA
     //////////////// OTA Server setup /////////////////////
-    // WiFi.mode(WIFI_AP);
-    // WiFi.softAP(ssid, password);
-    // Serial.print("AP started: ");
-    // Serial.println(ssid);
-    // Serial.print("IP address: ");
-    // Serial.println(WiFi.softAPIP());
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(ssid, password);
+    Serial.print("AP started: ");
+    Serial.println(ssid);
+    Serial.print("IP address: ");
+    Serial.println(WiFi.softAPIP());
 
-    // server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    //     request->send(200, "text/plain", "Hi! Go to <this_ip>/update to upload files!");
-    // });
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/plain", "Hi! Go to <this_ip>/update to upload files!");
+    });
 
-    // AsyncElegantOTA.begin(&server); // Start ElegantOTA
-    // server.begin();
-    // Serial.println("HTTP server started");
+    AsyncElegantOTA.begin(&server); // Start ElegantOTA
+    server.begin();
+    Serial.println("HTTP server started");
     /////////^ DO NOT TOUCH OR YOU BREAK OTA ^///////////////
+    #endif
 
     btn_up.begin(UP_PIN);
     btn_up.setPressedHandler(btn_pressed);
@@ -121,8 +138,6 @@ void setup() {
     // Set this location as the starting location and save it
     gps_storage.addBookmark(gps_storage.returnUser().latitude, gps_storage.returnUser().longitude, gps_storage.returnUser().depth, "[Start Location]", 1);
     sd_controller.writeGpsArrayToSD(gps_storage.arr);
-
-    Serial.println("Setup finished");
 }
 
 void loop() {
@@ -206,7 +221,7 @@ void loop() {
                 // return to list
                 bookmarks.current_sub_state = bookmarks.Substate::list;
                 bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
-            } else if (bookmarks.current_sub_state = bookmarks.Substate::add_bookmark) {
+            } else if (bookmarks.current_sub_state == bookmarks.Substate::add_bookmark) {
                 // return to list
                 bookmarks.current_sub_state = bookmarks.Substate::list;
                 bookmarks.updateBookmarks(); // Force update bookmarks to make popup disappear instantly
@@ -297,7 +312,7 @@ void loop() {
         }
 
         if (btn_right_pressed) {
-            if (!messages_check.current_sub_state == messages_check.Substate::warning_popup) {
+            if (messages_check.current_sub_state != messages_check.Substate::warning_popup) {
                 messages_check.current_sub_state = messages_check.Substate::info_popup;
                 messages_check.updateInfoPanel(); /// Force update to show instantly
             }
@@ -338,10 +353,9 @@ void loop() {
 
         if (btn_right_pressed) {
             // Send currently selected item
-
-            // TO DO: ADD CODE HERE TO ACTUALLY SEND IT
-            Serial.print("Send message: ");
-            Serial.println(msg_storage.message_descriptions[messages_send.returnSelectedItem()]);
+            communication.sendMSG(msg_storage.message_descriptions[messages_send.returnSelectedItem()]);
+            // Return to main menu to indicate it has been sent
+            current_state = main_menu;
         }
         break;
     case send_emergency:
@@ -362,10 +376,9 @@ void loop() {
 
         if (btn_right_pressed) {
             // Send currently selected item
-
-            // TO DO: ADD CODE HERE TO ACTUALLY SEND IT
-            Serial.print("Send message: ");
-            Serial.println(msg_storage.emergency_descriptions[messages_emergency_send.returnSelectedItem()]);
+            communication.sendEMR(msg_storage.emergency_descriptions[messages_emergency_send.returnSelectedItem()]);
+            // Return to main menu to indicate it has been sent
+            current_state = main_menu;
         }
         break;
     default:
@@ -390,5 +403,18 @@ void loop() {
             messages_check.setSelectedItem(msg_storage.returnEmergencySlot());
             messages_check.updateInfoPanel(); /// Force update to show instantly
         }
+    }
+
+    // Send user location every SEND_USER_LOCATION_INTERVAL milliseconds
+    send_user_loc_current_time = millis();
+    if (send_user_loc_current_time - send_user_loc_previous_time >= SEND_USER_LOCATION_INTERVAL) {
+        send_user_loc_previous_time = send_user_loc_current_time;
+
+        communication.sendUserGPS();
+    }
+
+    // Check if anything has been received on the UART RX line
+    if (communication.readReceived()) {
+        sd_controller.writeGpsArrayToSD(gps_storage.arr);
     }
 }
