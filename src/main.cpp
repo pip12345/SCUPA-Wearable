@@ -3,10 +3,11 @@
 #include "sdcard.h"
 #include "sensors.h"
 #include "tft_drawing.h"
-#include <SPI.h>
 #include <Arduino.h>
+#include <SPI.h>
 
-//#define INCLUDE_OTA // Uncomment to compile with over-the-air uploading
+// #define INCLUDE_OTA // Uncomment to compile with over-the-air uploading
+#define DEBUG_MODE // Uncomment for debug mode, disables GPB receive wait and compass init
 
 #ifdef INCLUDE_OTA
 #include <AsyncElegantOTA.h>
@@ -27,7 +28,7 @@ AsyncWebServer server(80);
 #define LEFT_PIN 26
 #define RIGHT_PIN 21
 
-#define SEND_USER_LOCATION_INTERVAL 100 // Send user location every 30 seconds 30000
+#define SEND_USER_LOCATION_INTERVAL 2000 // Send user location every 30 seconds 30000
 
 DrawController screen;
 DrawMap gps_map;
@@ -77,7 +78,7 @@ void btn_longclick(Button2 &btn) {
 
 void setup() {
 
-    #ifdef INCLUDE_OTA
+#ifdef INCLUDE_OTA
     //////////////// OTA Server setup /////////////////////
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, password);
@@ -93,8 +94,8 @@ void setup() {
     AsyncElegantOTA.begin(&server); // Start ElegantOTA
     server.begin();
     Serial.println("HTTP server started");
-    /////////^ DO NOT TOUCH OR YOU BREAK OTA ^///////////////
-    #endif
+/////////^ DO NOT TOUCH OR YOU BREAK OTA ^///////////////
+#endif
 
     btn_up.begin(UP_PIN);
     btn_up.setPressedHandler(btn_pressed);
@@ -126,26 +127,49 @@ void setup() {
     // msg_storage.addEntryNext("Cool last message");
     /////// DEBUG //////////
 
-    // RUN GPS AND DEPTH SENSOR HERE ONCE FOR STARTING LOCATION
-    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
     // Read Current data from SD card
     sd_controller.readGpsArrayFromSD(gps_storage.arr);
     sd_controller.readGpsDescriptionsFromSD(gps_storage.descriptions);
     sd_controller.readMsgDescriptionsFromSD(msg_storage.message_descriptions);
     sd_controller.readMsgEmergencyDescriptionsFromSD(msg_storage.emergency_descriptions);
 
+#ifndef DEBUG_MODE
+    Serial.println("Initializing compass");
+    sensors.initCompass();
+    Serial.println("Compass initialized");
+    screen.loading_screen();
+    // RUN GPS HERE ONCE FOR STARTING LOCATION
+    Serial.println("Waiting for GPB receive from buoy");
+    while (!communication.GPB_received) {
+        // Reading buffers waiting for GPB
+        communication.readReceived();
+        if (btn_right_pressed) {
+            break;
+        }
+    }
+    Serial.println("GPB received.");
+#endif
+
     // Set this location as the starting location and save it
     gps_storage.addBookmark(gps_storage.returnUser().latitude, gps_storage.returnUser().longitude, gps_storage.returnUser().depth, "[Start Location]", 1);
     sd_controller.writeGpsArrayToSD(gps_storage.arr);
+
+    Serial.println("Setup finished");
 }
 
 void loop() {
+    // UPDATE BUTTONS
     btn_up.loop();
     btn_down.loop();
     btn_left.loop();
     btn_right.loop();
 
+    // UPDATE SENSORS
+    sensors.loopCompass();
+    gps_map.compass_angle = sensors.compass_azimuth; // Update map compass angle with the last retrieved compass angle
+    sensors.loopDepth();
+
+    // WINDOW STATE MACHINE
     switch (current_state) {
     case main_menu:
 

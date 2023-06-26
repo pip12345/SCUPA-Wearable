@@ -45,3 +45,4 @@ Runs on ESP32 with platformIO.
 * Button2: https://github.com/LennartHennigs/Button2
 * ESPAsyncWebServer: https://github.com/me-no-dev/ESPAsyncWebServer
 * AsyncElegantOTA: https://github.com/ayushsharma82/AsyncElegantOTA
+* QMC5883L Compass Arduino Library: https://github.com/mprograms/QMC5883LCompass

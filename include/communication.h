@@ -53,6 +53,7 @@ class CommHandler {
     void sendEMR(String emr_msg);
 
     String last_received{}; // Last received string
+    bool GPB_received{false}; // True if a coordinate has been received from GPB once.
 
   private:
     // Holds last read values

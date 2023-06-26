@@ -49,6 +49,7 @@ bool CommHandler::readReceived() {
                 last_received = "|" + type + "|" + gpb_lat + "|" + gpb_lon + "|";
 
                 gps_storage.setUser(gpb_lat.toFloat(), gpb_lon.toFloat(), sensors.depth);
+                GPB_received = true; // Received first coordinate from GPB, GPB is active.
             }
         }
 
