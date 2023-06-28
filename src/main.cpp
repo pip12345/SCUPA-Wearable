@@ -28,7 +28,7 @@ AsyncWebServer server(80);
 #define LEFT_PIN 26
 #define RIGHT_PIN 21
 
-#define SEND_USER_LOCATION_INTERVAL 2000 // Send user location every 30 seconds 30000
+#define SEND_USER_LOCATION_INTERVAL 30000 // Send user location every 30 seconds 30000
 
 DrawController screen;
 DrawMap gps_map;
@@ -139,7 +139,7 @@ void setup() {
     Serial.println("Compass initialized");
     screen.loading_screen();
     // RUN GPS HERE ONCE FOR STARTING LOCATION
-    Serial.println("Waiting for GPB receive from buoy");
+    Serial.println("Waiting for coordinate receive from buoy");
     while (!communication.GPB_received) {
         // Reading buffers waiting for GPB
         communication.readReceived();
@@ -147,7 +147,7 @@ void setup() {
             break;
         }
     }
-    Serial.println("GPB received.");
+    Serial.println("Buoy coordinate received.");
 #endif
 
     // Set this location as the starting location and save it

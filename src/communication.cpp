@@ -12,6 +12,7 @@ CommHandler::CommHandler() {
 
 bool CommHandler::readReceived() {
     bool saveGPStoSD = false;
+    // IGNORE ANYTHING WITHOUT STARTING WITH |
 
     if (Serial.available()) {
         // Only do anything if the received string starts with a '|'
@@ -53,8 +54,11 @@ bool CommHandler::readReceived() {
             }
         }
 
-        Serial.begin(baud); // Flush buffers for new string
-        // Serial.println(last_received);
+        // Flush buffers
+        while(Serial.available()) {
+            Serial.read();
+        }
+
     }
 
     return saveGPStoSD;
