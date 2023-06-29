@@ -12,7 +12,6 @@ CommHandler::CommHandler() {
 
 bool CommHandler::readReceived() {
     bool saveGPStoSD = false;
-    // IGNORE ANYTHING WITHOUT STARTING WITH |
 
     if (Serial.available()) {
         // Only do anything if the received string starts with a '|'
