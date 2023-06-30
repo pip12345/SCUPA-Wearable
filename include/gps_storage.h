@@ -40,9 +40,3 @@ class GpsStorage {
 
     GpsCoordinates arr[GPS_STORAGE_SLOTS]{}; // Holds bookmarked GPS coordinates
 };
-
-/*
-!!!!!!!!!!!!!!!!!!!!! TO DO !!!!!!!!!!!!!!!!!!!!!!!!!
-GpsStorage arr and other relevant data needs to be stored on the EEPROM or SD card
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-*/
