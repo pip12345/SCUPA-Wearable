@@ -1,20 +1,21 @@
 #include "sensors.h"
 
-int Sensors::readDepth() {
-    return -1;
+void Sensors::readDepth() {
+    // Not implemented currently
+
+    // Logic for reading the sensor here
+    depth = -1;
 }
 
-int Sensors::readCompass() {
+void Sensors::readCompass() {
     if (compass_connected) {
         compass_azimuth = compass.getAzimuth();
-        return compass_azimuth;
     } else {
         // Debug program that rotates the compass in circles when there's no compass connected
         compass_azimuth += 10;
         if (compass_azimuth >= 360) {
             compass_azimuth = 0;
         }
-        return compass_azimuth;
     }
 }
 

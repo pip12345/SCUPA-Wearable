@@ -6,13 +6,13 @@ class Sensors {
   public:
     void initCompass();
 
-    int readDepth();
-    int readCompass();
+    void readDepth();
+    void readCompass();
 
     void loopDepth();
     void loopCompass();
 
-    int depth{};           // Last measured depth
+    float depth{-1};           // Last measured depth
     int compass_azimuth{}; // Last measured compass azimuth
 
     QMC5883LCompass compass;

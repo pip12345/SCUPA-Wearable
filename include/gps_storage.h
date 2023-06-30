@@ -34,6 +34,7 @@ class GpsStorage {
 
     void setUser(GpsCoordinates location);                        // Set user coordinates
     void setUser(double latitude, double longitude, float depth); // Set user coordinates
+    void setUserDepth(float depth);
     GpsCoordinates returnUser();                                  // Return user coordinates
 
     String descriptions[GPS_DESCRIPTION_STRINGS]{}; // Holds preprogrammed descriptions. Stretch goal: read this from SD card instead?

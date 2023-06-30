@@ -168,6 +168,8 @@ void loop() {
     sensors.loopCompass();
     gps_map.compass_angle = sensors.compass_azimuth; // Update map compass angle with the last retrieved compass angle
     sensors.loopDepth();
+    gps_storage.setUserDepth(sensors.depth); // Update user depth with the latest received depth from the sensor
+
 
     // WINDOW STATE MACHINE
     switch (current_state) {

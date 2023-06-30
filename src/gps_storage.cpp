@@ -95,6 +95,11 @@ void GpsStorage::setUser(double latitude, double longitude, float depth) {
     arr[0].description = "&USER";
 }
 
+void GpsStorage::setUserDepth(float depth)
+{
+    arr[0].depth = depth;
+}
+
 GpsCoordinates GpsStorage::returnUser() {
     return arr[0];
 }
