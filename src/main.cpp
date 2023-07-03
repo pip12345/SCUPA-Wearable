@@ -351,7 +351,7 @@ void loop() {
                 messages_check.current_sub_state = messages_check.Substate::warning_popup;
                 messages_check.updateWarningPopUp(); // Force update to show instantly
 
-                // If long pressed again while in the warning popup state
+                // If long pressed again while in the warning popup state, delete the message
             } else if (messages_check.current_sub_state == messages_check.Substate::warning_popup) {
                 msg_storage.deleteEntry(messages_check.returnSelectedItem());     // Delete message if in the popup state
                 msg_storage.reorganize();                                         // Reorganize list to avoid empty spot in the middle

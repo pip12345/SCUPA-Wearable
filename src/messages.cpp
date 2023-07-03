@@ -2,7 +2,7 @@
 
 Message::Message() {
     this->emergency = false;
-    this->text = "ERROR NO TEXT IN MESSAGE, YOU SHOULDN'T BE ABLE TO SEE THIS";
+    this->text = "<<This message has no contents>>";
 }
 
 Message::Message(String text) {
