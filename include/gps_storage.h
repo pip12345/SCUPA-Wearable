@@ -34,15 +34,10 @@ class GpsStorage {
 
     void setUser(GpsCoordinates location);                        // Set user coordinates
     void setUser(double latitude, double longitude, float depth); // Set user coordinates
+    void setUserDepth(float depth);
     GpsCoordinates returnUser();                                  // Return user coordinates
 
     String descriptions[GPS_DESCRIPTION_STRINGS]{}; // Holds preprogrammed descriptions. Stretch goal: read this from SD card instead?
 
     GpsCoordinates arr[GPS_STORAGE_SLOTS]{}; // Holds bookmarked GPS coordinates
 };
-
-/*
-!!!!!!!!!!!!!!!!!!!!! TO DO !!!!!!!!!!!!!!!!!!!!!!!!!
-GpsStorage arr and other relevant data needs to be stored on the EEPROM or SD card
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-*/

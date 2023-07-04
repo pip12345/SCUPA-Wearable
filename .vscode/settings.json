@@ -8,5 +8,6 @@
         "memory": "cpp",
         "cmath": "cpp",
         "random": "cpp"
-    }
+    },
+    "C_Cpp.dimInactiveRegions": true
 }

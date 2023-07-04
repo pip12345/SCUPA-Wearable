@@ -15,6 +15,22 @@ DrawController::DrawController() {
     Serial.print("Draw Controller Initialized");
 }
 
+void DrawController::loading_screen()
+{
+    tft.fillScreen(BACKGROUND_COLOR); // Wipe whole screen
+    tft.setTextSize(2);
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setTextWrap(true);
+
+    tft.setCursor((TFT_CENTER_X-70), TFT_CENTER_Y-30);
+    tft.println("INITIALIZING");
+    tft.println("");
+    tft.println("");
+    tft.println("     WAITING FOR GPS");
+    tft.println(" COORDINATES FROM BUOY...");
+    tft.setTextSize(1);
+}
+
 // Clear all elements from screen
 void DrawController::clearAll() {
     tft.fillScreen(BACKGROUND_COLOR);
@@ -29,7 +45,7 @@ void DrawController::resetTextToDefault() {
 // constructor
 DrawMap::DrawMap() {
     pixels_per_meter = 0.4;
-    compass_angle = 90;
+    compass_angle = 0;
 }
 
 // Update and redraw the map with the given storage data
@@ -43,8 +59,6 @@ void DrawMap::updateMap() {
     drawCoordinates();
     drawText();
 
-    // TO DO: ADD FUNCTION HERE THAT GETS THE LATEST COMPASS ANGLE FROM MAGNETOMETER
-    // TO DO: ADD FUNCTION THAT SETS THE COURSE
     drawCourse();                 // update course to the set course_id
     updateCompass(compass_angle); // Update compass
 }
@@ -90,8 +104,7 @@ void DrawMap::updateRingsRadiusText(int range_close, int range_medium) {
 
 // Update the compass direction and draw the compass
 void DrawMap::updateCompass(float angle) {
-    // !!!!!!!!!!!!! PLEASE CHECK BELOW LINE !!!!!!!!!!!!!!
-    angle = 360 + (90 - angle); // TEMP: convert angle from compass angle (0 degrees = north) to unit circle angle (0 degrees = E)
+    //angle = 360 + (90 - angle); // TEMP: convert angle from compass angle (0 degrees = north) to unit circle angle (0 degrees = E)
 
     int x_offset{};
     int y_offset{}; // The resulting offsets from the center point
