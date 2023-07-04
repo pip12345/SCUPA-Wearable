@@ -36,7 +36,7 @@ AsyncWebServer server(80);
 #define LEFT_PIN 35  // Left lower
 #define RIGHT_PIN 39 // Left upper
 
-#define SEND_USER_LOCATION_INTERVAL 15000 // Send user location every 30 seconds 30000
+#define SEND_USER_LOCATION_INTERVAL 5000 // Send user location every 30 seconds 30000
 
 DrawController screen;
 DrawMap gps_map;
@@ -104,6 +104,7 @@ void setup() {
     Serial.println("HTTP server started");
 /////////^ DO NOT TOUCH OR YOU BREAK OTA ^///////////////
 #endif
+    Wire.begin(); // Enable i2c
 
     btn_up.begin(UP_PIN);
     btn_up.setPressedHandler(btn_pressed);
@@ -122,8 +123,11 @@ void setup() {
     sd_controller.readMsgDescriptionsFromSD(msg_storage.message_descriptions);
     sd_controller.readMsgEmergencyDescriptionsFromSD(msg_storage.emergency_descriptions);
 
+    // Initialization fails here if compass isn't connected
     Serial.println("Initializing compass");
     sensors.initCompass();
+    Serial.println("Initializing depth sensor");
+    sensors.initDepth();
 
 #ifndef DEBUG_MODE
 

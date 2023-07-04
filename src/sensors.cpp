@@ -1,10 +1,9 @@
 #include "sensors.h"
 
 void Sensors::readDepth() {
-    // Not implemented currently
-
     // Logic for reading the sensor here
-    depth = -1;
+    depth_sensor.read();
+    depth = depth_sensor.depth();
 }
 
 void Sensors::readCompass() {
@@ -43,6 +42,11 @@ void Sensors::loopCompass() {
 
 void Sensors::initCompass() {
     compass_connected = true;
-    Wire.begin();
     compass.init();
+}
+
+void Sensors::initDepth()
+{
+    depth_sensor.init();
+    depth_sensor.setModel(MS5837::MS5837_30BA);
 }
