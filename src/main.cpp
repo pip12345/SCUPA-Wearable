@@ -4,7 +4,12 @@
 #include "sensors.h"
 #include "tft_drawing.h"
 #include <Arduino.h>
+#include <QMC5883LCompass.h>
 #include <SPI.h>
+
+#include <MechaQMC5883.h>
+#include <Wire.h>
+MechaQMC5883 qmc;
 
 // #define INCLUDE_OTA // Uncomment to compile with over-the-air uploading
 #define DEBUG_MODE // Uncomment for debug mode, disables GPB receive wait and compass init
@@ -30,9 +35,9 @@ AsyncWebServer server(80);
 // #define RIGHT_PIN 21
 
 // Real
-#define UP_PIN 36 // Right upper
-#define DOWN_PIN 34 // Right lower
-#define LEFT_PIN 35 // Left lower
+#define UP_PIN 36    // Right upper
+#define DOWN_PIN 34  // Right lower
+#define LEFT_PIN 35  // Left lower
 #define RIGHT_PIN 39 // Left upper
 
 #define SEND_USER_LOCATION_INTERVAL 15000 // Send user location every 30 seconds 30000
@@ -85,6 +90,9 @@ void btn_longclick(Button2 &btn) {
 
 void setup() {
 
+    Wire.begin();
+    qmc.init();
+
 #ifdef INCLUDE_OTA
     //////////////// OTA Server setup /////////////////////
     WiFi.mode(WIFI_AP);
@@ -121,9 +129,9 @@ void setup() {
     sd_controller.readMsgDescriptionsFromSD(msg_storage.message_descriptions);
     sd_controller.readMsgEmergencyDescriptionsFromSD(msg_storage.emergency_descriptions);
 
-    Serial.println("Initializing compass");
-    sensors.initCompass();
-    
+    // Serial.println("Initializing compass");
+    // sensors.initCompass();
+
 #ifndef DEBUG_MODE
 
     Serial.println("Compass initialized");
@@ -160,6 +168,14 @@ void loop() {
     sensors.loopDepth();
     gps_storage.setUserDepth(sensors.depth); // Update user depth with the latest received depth from the sensor
 
+    int x, y, z;
+    int a;
+
+    qmc.read(&x, &y, &z);
+    a = qmc.azimuth(&y, &x);
+
+    Serial.print("azimuth: ");
+    Serial.println(a);
 
     // WINDOW STATE MACHINE
     switch (current_state) {
