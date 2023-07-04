@@ -32,7 +32,19 @@ void Sensors::loopCompass() {
     current_time_compass = millis();
     if (current_time_compass - previous_time_compass >= LOOP_UPDATE_INTERVAL_COMPASS) {
         previous_time_compass = current_time_compass;
+        Serial.print("azimuth: ");
+        Serial.println(compass_azimuth);
+        int x = compass.getX();
+        int y = compass.getY();
+        int z = compass.getZ();
+        Serial.print("x: ");
+        Serial.println(x);
+        Serial.print("y: ");
+        Serial.println(y);
+        Serial.print("z: ");
+        Serial.println(z);
 
+        
         readCompass();
     }
 }

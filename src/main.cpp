@@ -16,19 +16,26 @@
 #endif
 
 #ifdef INCLUDE_OTA
-// Web server for Over The Air uploading, DO NOT TOUCH OR YOU BREAK OTA //
+// Web server for Over The Air uploading, DO NOT TOUCH OR YOU MAY BRICK THE DEVICE //
 const char *ssid = "SCUPA Wearable";
 const char *password = "stokkink";
 AsyncWebServer server(80);
 #endif
 
 // Button pins
-#define UP_PIN 33
-#define DOWN_PIN 25
-#define LEFT_PIN 26
-#define RIGHT_PIN 21
+// Proto
+// #define UP_PIN 33
+// #define DOWN_PIN 25
+// #define LEFT_PIN 26
+// #define RIGHT_PIN 21
 
-#define SEND_USER_LOCATION_INTERVAL 30000 // Send user location every 30 seconds 30000
+// Real
+#define UP_PIN 36 // Right upper
+#define DOWN_PIN 34 // Right lower
+#define LEFT_PIN 35 // Left lower
+#define RIGHT_PIN 39 // Left upper
+
+#define SEND_USER_LOCATION_INTERVAL 15000 // Send user location every 30 seconds 30000
 
 DrawController screen;
 DrawMap gps_map;
@@ -106,26 +113,7 @@ void setup() {
     btn_right.begin(RIGHT_PIN);
     btn_right.setClickHandler(btn_pressed);
     btn_right.setLongClickHandler(btn_longclick);
-    btn_right.setLongClickTime(500); // Longclick is 500 ms
-
-    /////// DEBUG //////////
-    // Distance between userlocation and seahorses is 139.85 m
-    // gps_storage.setUser(12.195722, -69.046859, 10);
-    // gps_storage.addBookmark(12.194572, -69.047380, 12, "Sea horses", 2);
-    // gps_storage.addBookmark(12.195009, -69.046143, 31, "Shipwreck", 3);
-    // gps_storage.addBookmark(12.197472, -69.047321, 0, "Cool boat", 4);
-    // gps_storage.addBookmark(12.196264, -69.051067, 0, "Beach", 5);
-    // for (int i = 5; i < 32; i++) {
-    //     gps_storage.addBookmark(10 + i, 10 + i, 0, "Filler", i);
-    // }
-    // gps_storage.addBookmark(69, 69, 0, "This was painful", 63);
-    // /////// DEBUG //////////
-    // msg_storage.addEntryNext("Cool message 1");
-    // msg_storage.addEntryNext("Cool message 2");
-    // msg_storage.addEntryNext("I am in excruciating pain without any indication if it will stop any time soon, please send help");
-    // msg_storage.addEntryNext("Cool message 3");
-    // msg_storage.addEntryNext("Cool last message");
-    /////// DEBUG //////////
+    btn_right.setLongClickTime(2000); // Longclick is 2 seconds
 
     // Read Current data from SD card
     sd_controller.readGpsArrayFromSD(gps_storage.arr);
@@ -133,12 +121,14 @@ void setup() {
     sd_controller.readMsgDescriptionsFromSD(msg_storage.message_descriptions);
     sd_controller.readMsgEmergencyDescriptionsFromSD(msg_storage.emergency_descriptions);
 
-#ifndef DEBUG_MODE
     Serial.println("Initializing compass");
     sensors.initCompass();
+    
+#ifndef DEBUG_MODE
+
     Serial.println("Compass initialized");
     screen.loading_screen();
-    // RUN GPS HERE ONCE FOR STARTING LOCATION
+    // RUN GPS ONCE FOR STARTING LOCATION
     Serial.println("Waiting for coordinate receive from buoy");
     while (!communication.GPB_received) {
         // Reading buffers waiting for GPB
