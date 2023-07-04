@@ -36,7 +36,7 @@ AsyncWebServer server(80);
 #define LEFT_PIN 35  // Left lower
 #define RIGHT_PIN 39 // Left upper
 
-#define SEND_USER_LOCATION_INTERVAL 5000 // Send user location every 30 seconds 30000
+#define SEND_USER_LOCATION_INTERVAL 30000 // Send user location every 30 seconds 30000
 
 DrawController screen;
 DrawMap gps_map;
