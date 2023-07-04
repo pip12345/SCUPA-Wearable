@@ -9,7 +9,11 @@ void Sensors::readDepth() {
 
 void Sensors::readCompass() {
     if (compass_connected) {
-        compass_azimuth = compass.getAzimuth();
+        int x, y, z;
+
+        compass.read(&x, &y, &z);
+        compass_azimuth = compass.azimuth(&y, &x);
+        compass_azimuth += 90; // Compass is 90 degrees offset on the PCB
     } else {
         // Debug program that rotates the compass in circles when there's no compass connected
         compass_azimuth += 10;
@@ -32,24 +36,13 @@ void Sensors::loopCompass() {
     current_time_compass = millis();
     if (current_time_compass - previous_time_compass >= LOOP_UPDATE_INTERVAL_COMPASS) {
         previous_time_compass = current_time_compass;
-        Serial.print("azimuth: ");
-        Serial.println(compass_azimuth);
-        int x = compass.getX();
-        int y = compass.getY();
-        int z = compass.getZ();
-        Serial.print("x: ");
-        Serial.println(x);
-        Serial.print("y: ");
-        Serial.println(y);
-        Serial.print("z: ");
-        Serial.println(z);
 
-        
         readCompass();
     }
 }
 
 void Sensors::initCompass() {
     compass_connected = true;
+    Wire.begin();
     compass.init();
 }
