@@ -6,9 +6,9 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-
-// #define INCLUDE_OTA // Uncomment to compile with over-the-air uploading
 #define DEBUG_MODE // Uncomment for debug mode, disables GPB receive wait and compass init
+// #define INCLUDE_OTA // Uncomment to compile with over-the-air uploading
+#define SENSORS_ENABLED // comment to disable sensors
 
 #ifdef INCLUDE_OTA
 #include <AsyncElegantOTA.h>
@@ -36,7 +36,7 @@ AsyncWebServer server(80);
 #define LEFT_PIN 35  // Left lower
 #define RIGHT_PIN 39 // Left upper
 
-#define SEND_USER_LOCATION_INTERVAL 30000 // Send user location every 30 seconds 30000
+#define SEND_USER_LOCATION_INTERVAL 10000 // Send user location every 30 seconds 30000
 
 DrawController screen;
 DrawMap gps_map;
@@ -104,7 +104,10 @@ void setup() {
     Serial.println("HTTP server started");
 /////////^ DO NOT TOUCH OR YOU BREAK OTA ^///////////////
 #endif
+
+#ifdef SENSORS_ENABLED
     Wire.begin(); // Enable i2c
+#endif
 
     btn_up.begin(UP_PIN);
     btn_up.setPressedHandler(btn_pressed);
@@ -115,7 +118,7 @@ void setup() {
     btn_right.begin(RIGHT_PIN);
     btn_right.setClickHandler(btn_pressed);
     btn_right.setLongClickHandler(btn_longclick);
-    btn_right.setLongClickTime(2000); // Longclick is 2 seconds
+    btn_right.setLongClickTime(1500); // Longclick is 1.5 seconds
 
     // Read Current data from SD card
     sd_controller.readGpsArrayFromSD(gps_storage.arr);
@@ -123,12 +126,13 @@ void setup() {
     sd_controller.readMsgDescriptionsFromSD(msg_storage.message_descriptions);
     sd_controller.readMsgEmergencyDescriptionsFromSD(msg_storage.emergency_descriptions);
 
+#ifdef SENSORS_ENABLED
     // Initialization fails here if compass isn't connected
     Serial.println("Initializing compass");
     sensors.initCompass();
     Serial.println("Initializing depth sensor");
     sensors.initDepth();
-
+#endif
 #ifndef DEBUG_MODE
 
     Serial.println("Compass initialized");

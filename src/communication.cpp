@@ -52,12 +52,11 @@ bool CommHandler::readReceived() {
                 GPB_received = true; // Received first coordinate from GPB, GPB is active.
             }
         }
+    }
 
-        // Flush buffers
-        while(Serial.available()) {
-            Serial.read();
-        }
-
+    //Flush buffers if there's anything left
+    while (Serial.available()) {
+        Serial.read();
     }
 
     return saveGPStoSD;
@@ -77,7 +76,8 @@ void CommHandler::sendBookmarkGPS(int slot) {
     digitalWrite(RTS_PIN, HIGH);
     delayMicroseconds(8); // Length of 1 byte
     Serial.println(send_str);
-    delayMicroseconds(2300); // Length of 256 bytes
+    // delayMicroseconds(2300); // Length of 256 bytes
+    delay(4);
     digitalWrite(RTS_PIN, LOW);
 }
 
@@ -95,7 +95,8 @@ void CommHandler::sendUserGPS() {
     digitalWrite(RTS_PIN, HIGH);
     delayMicroseconds(8);
     Serial.println(send_str);
-    delayMicroseconds(2300);
+    // delayMicroseconds(2300);
+    delay(4);
     digitalWrite(RTS_PIN, LOW);
 }
 
@@ -105,7 +106,8 @@ void CommHandler::sendMSG(String msg) {
     digitalWrite(RTS_PIN, HIGH);
     delayMicroseconds(8);
     Serial.println(send_str);
-    delayMicroseconds(2300);
+    // delayMicroseconds(2300);
+    delay(4);
     digitalWrite(RTS_PIN, LOW);
 }
 
@@ -115,6 +117,7 @@ void CommHandler::sendEMR(String emr_msg) {
     digitalWrite(RTS_PIN, HIGH);
     delayMicroseconds(8);
     Serial.println(send_str);
-    delayMicroseconds(2300);
+    // delayMicroseconds(4600);
+    delay(4);
     digitalWrite(RTS_PIN, LOW);
 }
