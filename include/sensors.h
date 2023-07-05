@@ -1,10 +1,15 @@
 #pragma once
 
-#include "QMC5883LCompass.h"
+#include <Wire.h>
+#include "MechaQMC5883.h"
+#include "MS5837.h"
+
+
 
 class Sensors {
   public:
     void initCompass();
+    void initDepth();
 
     void readDepth();
     void readCompass();
@@ -15,13 +20,13 @@ class Sensors {
     float depth{-1};           // Last measured depth
     int compass_azimuth{}; // Last measured compass azimuth
 
-    QMC5883LCompass compass;
+    MechaQMC5883 compass;
+    MS5837 depth_sensor;
 
     bool compass_connected = false; // used for debugging
 
   private:
 
-    
 
     int current_time_depth{}; // Used for refreshing the loop
     int previous_time_depth{};

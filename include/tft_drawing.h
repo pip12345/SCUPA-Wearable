@@ -42,20 +42,20 @@ Therefore, all calls to tft must be done in the source file of this header
 #include "sdcard.h"
 
 /// PROTO
-#define TFT_MOSI 23 // DIN on waveshare
-#define TFT_SCK 18  // CLK on waveshare
-#define TFT_CS 16  
-#define TFT_RST 17 
-#define TFT_DC 32  
-#define TFT_BL 27   // Backlight, any pin, just needs to be on
-
-/// REAL
 // #define TFT_MOSI 23 // DIN on waveshare
 // #define TFT_SCK 18  // CLK on waveshare
-// #define TFT_CS 25
-// #define TFT_RST 33
-// #define TFT_DC 26
-// #define TFT_BL 17   // Backlight, any pin, just needs to be on
+// #define TFT_CS 16  
+// #define TFT_RST 17 
+// #define TFT_DC 32  
+// #define TFT_BL 27   // Backlight, any pin, just needs to be on
+
+/// REAL
+#define TFT_MOSI 23 // DIN on waveshare
+#define TFT_SCK 18  // CLK on waveshare
+#define TFT_CS 32
+#define TFT_RST 25
+#define TFT_DC 33
+#define TFT_BL 26   // Backlight, any pin, just needs to be on
 
 // Coordinates go from X: 0 - 239 and Y: 0 - 319
 #define TFT_Y 240
@@ -79,6 +79,7 @@ class DrawController {
     void init();
 
     void loading_screen();
+    void setup_finished_screen();
 
     void clearAll();
     void resetTextToDefault();

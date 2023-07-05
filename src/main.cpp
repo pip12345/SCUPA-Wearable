@@ -6,8 +6,9 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-// #define INCLUDE_OTA // Uncomment to compile with over-the-air uploading
-#define DEBUG_MODE // Uncomment for debug mode, disables GPB receive wait and compass init
+// #define DEBUG_MODE // Uncomment for debug mode, disables GPB receive wait and compass init
+// #define INCLUDE_OTA     // Uncomment to compile with over-the-air uploading
+#define SENSORS_ENABLED // comment to disable sensors
 
 #ifdef INCLUDE_OTA
 #include <AsyncElegantOTA.h>
@@ -16,19 +17,26 @@
 #endif
 
 #ifdef INCLUDE_OTA
-// Web server for Over The Air uploading, DO NOT TOUCH OR YOU BREAK OTA //
+// Web server for Over The Air uploading, DO NOT TOUCH OR YOU MAY BRICK THE DEVICE //
 const char *ssid = "SCUPA Wearable";
 const char *password = "stokkink";
 AsyncWebServer server(80);
 #endif
 
 // Button pins
-#define UP_PIN 33
-#define DOWN_PIN 25
-#define LEFT_PIN 26
-#define RIGHT_PIN 21
+// Proto
+// #define UP_PIN 33
+// #define DOWN_PIN 25
+// #define LEFT_PIN 26
+// #define RIGHT_PIN 21
 
-#define SEND_USER_LOCATION_INTERVAL 30000 // Send user location every 30 seconds 30000
+// Real
+#define UP_PIN 36    // Right upper
+#define DOWN_PIN 34  // Right lower
+#define LEFT_PIN 35  // Left lower
+#define RIGHT_PIN 39 // Left upper
+
+#define SEND_USER_LOCATION_INTERVAL 10000 // Send user location every 30 seconds 30000
 
 DrawController screen;
 DrawMap gps_map;
@@ -47,6 +55,7 @@ MessageStorage msg_storage;
 Button2 btn_up, btn_down, btn_left, btn_right;
 bool btn_up_pressed{}, btn_down_pressed{}, btn_left_pressed{}, btn_right_pressed{}, btn_right_long_pressed{};
 bool emergency_displayed{}; // Flag used to only display a single emergency message at once
+bool setup_flag{false};
 
 int send_user_loc_current_time{}; // Used for refreshing the loop
 int send_user_loc_previous_time{};
@@ -80,6 +89,7 @@ void setup() {
 
 #ifdef INCLUDE_OTA
     //////////////// OTA Server setup /////////////////////
+    WiFi.setTxPower(WIFI_POWER_MINUS_1dBm); // Low power wifi mode (doesnt work because esp-arduino sucks)
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, password);
     Serial.print("AP started: ");
@@ -97,6 +107,10 @@ void setup() {
 /////////^ DO NOT TOUCH OR YOU BREAK OTA ^///////////////
 #endif
 
+#ifdef SENSORS_ENABLED
+    Wire.begin(); // Enable i2c
+#endif
+
     btn_up.begin(UP_PIN);
     btn_up.setPressedHandler(btn_pressed);
     btn_down.begin(DOWN_PIN);
@@ -106,26 +120,7 @@ void setup() {
     btn_right.begin(RIGHT_PIN);
     btn_right.setClickHandler(btn_pressed);
     btn_right.setLongClickHandler(btn_longclick);
-    btn_right.setLongClickTime(500); // Longclick is 500 ms
-
-    /////// DEBUG //////////
-    // Distance between userlocation and seahorses is 139.85 m
-    // gps_storage.setUser(12.195722, -69.046859, 10);
-    // gps_storage.addBookmark(12.194572, -69.047380, 12, "Sea horses", 2);
-    // gps_storage.addBookmark(12.195009, -69.046143, 31, "Shipwreck", 3);
-    // gps_storage.addBookmark(12.197472, -69.047321, 0, "Cool boat", 4);
-    // gps_storage.addBookmark(12.196264, -69.051067, 0, "Beach", 5);
-    // for (int i = 5; i < 32; i++) {
-    //     gps_storage.addBookmark(10 + i, 10 + i, 0, "Filler", i);
-    // }
-    // gps_storage.addBookmark(69, 69, 0, "This was painful", 63);
-    // /////// DEBUG //////////
-    // msg_storage.addEntryNext("Cool message 1");
-    // msg_storage.addEntryNext("Cool message 2");
-    // msg_storage.addEntryNext("I am in excruciating pain without any indication if it will stop any time soon, please send help");
-    // msg_storage.addEntryNext("Cool message 3");
-    // msg_storage.addEntryNext("Cool last message");
-    /////// DEBUG //////////
+    btn_right.setLongClickTime(1500); // Longclick is 1.5 seconds
 
     // Read Current data from SD card
     sd_controller.readGpsArrayFromSD(gps_storage.arr);
@@ -133,18 +128,25 @@ void setup() {
     sd_controller.readMsgDescriptionsFromSD(msg_storage.message_descriptions);
     sd_controller.readMsgEmergencyDescriptionsFromSD(msg_storage.emergency_descriptions);
 
-#ifndef DEBUG_MODE
+#ifdef SENSORS_ENABLED
+    // Initialization fails here if compass isn't connected
     Serial.println("Initializing compass");
     sensors.initCompass();
+    Serial.println("Initializing depth sensor");
+    sensors.initDepth();
+#endif
+#ifndef DEBUG_MODE
     Serial.println("Compass initialized");
     screen.loading_screen();
-    // RUN GPS HERE ONCE FOR STARTING LOCATION
+
+    // RUN GPS ONCE FOR STARTING LOCATION
     Serial.println("Waiting for coordinate receive from buoy");
     while (!communication.GPB_received) {
         // Reading buffers waiting for GPB
+        btn_right.loop();
         communication.readReceived();
-        if (btn_right_pressed) {
-            break;
+        if (btn_right_long_pressed) {
+            communication.GPB_received = true;
         }
     }
     Serial.println("Buoy coordinate received.");
@@ -153,6 +155,30 @@ void setup() {
     // Set this location as the starting location and save it
     gps_storage.addBookmark(gps_storage.returnUser().latitude, gps_storage.returnUser().longitude, gps_storage.returnUser().depth, "[Start Location]", 1);
     sd_controller.writeGpsArrayToSD(gps_storage.arr);
+
+    // Reset buttons
+    btn_right_pressed = false;
+    btn_right_long_pressed = false;
+
+#ifdef INCLUDE_OTA
+    btn_right.loop();
+    screen.setup_finished_screen();
+    while (!setup_flag) {
+        btn_right.loop();
+        if (btn_right_pressed) {
+            setup_flag = true;
+        }
+    }
+
+    Serial.println("Disabling OTA");
+    server.end();
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+
+    // Reset buttons again
+    btn_right_pressed = false;
+    btn_right_long_pressed = false;
+#endif
 
     Serial.println("Setup finished");
 }
@@ -169,7 +195,6 @@ void loop() {
     gps_map.compass_angle = sensors.compass_azimuth; // Update map compass angle with the last retrieved compass angle
     sensors.loopDepth();
     gps_storage.setUserDepth(sensors.depth); // Update user depth with the latest received depth from the sensor
-
 
     // WINDOW STATE MACHINE
     switch (current_state) {

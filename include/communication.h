@@ -5,8 +5,8 @@
 #include "sensors.h"
 #include <Arduino.h>
 
-#define baud 115200
-#define RTS_PIN 32
+#define baud 230400 //115200
+#define RTS_PIN 16 // 32 other proto
 
 // Handles receiving and sending of serial messages to buoy
 
