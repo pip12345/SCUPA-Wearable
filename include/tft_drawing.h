@@ -79,6 +79,7 @@ class DrawController {
     void init();
 
     void loading_screen();
+    void setup_finished_screen();
 
     void clearAll();
     void resetTextToDefault();

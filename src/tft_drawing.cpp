@@ -26,8 +26,26 @@ void DrawController::loading_screen()
     tft.println("INITIALIZING");
     tft.println("");
     tft.println("");
-    tft.println("     WAITING FOR GPS");
-    tft.println(" COORDINATES FROM BUOY...");
+    tft.println("      WAITING FOR GPS");
+    tft.println("  COORDINATES FROM BUOY...");
+    tft.setTextSize(1);
+    tft.println(" ");
+    tft.println(" ");
+    tft.println("               LONG PRESS RIGHT TO CANCEL");
+}
+
+void DrawController::setup_finished_screen()
+{
+    tft.fillScreen(BACKGROUND_COLOR); // Wipe whole screen
+    tft.setTextSize(2);
+    tft.setTextColor(ST77XX_WHITE);
+    tft.setTextWrap(true);
+
+    tft.setCursor((0), TFT_CENTER_Y-30);
+    tft.println("          SETUP FINISHED");
+    tft.println("      OTA MODE ENABLED");
+    tft.println("");
+    tft.println("  PRESS RIGHT TO CONTINUE");
     tft.setTextSize(1);
 }
 

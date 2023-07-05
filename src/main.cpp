@@ -6,8 +6,8 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#define DEBUG_MODE // Uncomment for debug mode, disables GPB receive wait and compass init
-// #define INCLUDE_OTA // Uncomment to compile with over-the-air uploading
+// #define DEBUG_MODE // Uncomment for debug mode, disables GPB receive wait and compass init
+// #define INCLUDE_OTA     // Uncomment to compile with over-the-air uploading
 #define SENSORS_ENABLED // comment to disable sensors
 
 #ifdef INCLUDE_OTA
@@ -55,6 +55,7 @@ MessageStorage msg_storage;
 Button2 btn_up, btn_down, btn_left, btn_right;
 bool btn_up_pressed{}, btn_down_pressed{}, btn_left_pressed{}, btn_right_pressed{}, btn_right_long_pressed{};
 bool emergency_displayed{}; // Flag used to only display a single emergency message at once
+bool setup_flag{false};
 
 int send_user_loc_current_time{}; // Used for refreshing the loop
 int send_user_loc_previous_time{};
@@ -88,6 +89,7 @@ void setup() {
 
 #ifdef INCLUDE_OTA
     //////////////// OTA Server setup /////////////////////
+    WiFi.setTxPower(WIFI_POWER_MINUS_1dBm); // Low power wifi mode (doesnt work because esp-arduino sucks)
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, password);
     Serial.print("AP started: ");
@@ -134,16 +136,17 @@ void setup() {
     sensors.initDepth();
 #endif
 #ifndef DEBUG_MODE
-
     Serial.println("Compass initialized");
     screen.loading_screen();
+
     // RUN GPS ONCE FOR STARTING LOCATION
     Serial.println("Waiting for coordinate receive from buoy");
     while (!communication.GPB_received) {
         // Reading buffers waiting for GPB
+        btn_right.loop();
         communication.readReceived();
-        if (btn_right_pressed) {
-            break;
+        if (btn_right_long_pressed) {
+            communication.GPB_received = true;
         }
     }
     Serial.println("Buoy coordinate received.");
@@ -152,6 +155,30 @@ void setup() {
     // Set this location as the starting location and save it
     gps_storage.addBookmark(gps_storage.returnUser().latitude, gps_storage.returnUser().longitude, gps_storage.returnUser().depth, "[Start Location]", 1);
     sd_controller.writeGpsArrayToSD(gps_storage.arr);
+
+    // Reset buttons
+    btn_right_pressed = false;
+    btn_right_long_pressed = false;
+
+#ifdef INCLUDE_OTA
+    btn_right.loop();
+    screen.setup_finished_screen();
+    while (!setup_flag) {
+        btn_right.loop();
+        if (btn_right_pressed) {
+            setup_flag = true;
+        }
+    }
+
+    Serial.println("Disabling OTA");
+    server.end();
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+
+    // Reset buttons again
+    btn_right_pressed = false;
+    btn_right_long_pressed = false;
+#endif
 
     Serial.println("Setup finished");
 }
