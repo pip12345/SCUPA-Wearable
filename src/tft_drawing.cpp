@@ -15,14 +15,13 @@ DrawController::DrawController() {
     Serial.print("Draw Controller Initialized");
 }
 
-void DrawController::loading_screen()
-{
+void DrawController::loading_screen() {
     tft.fillScreen(BACKGROUND_COLOR); // Wipe whole screen
     tft.setTextSize(2);
     tft.setTextColor(ST77XX_WHITE);
     tft.setTextWrap(true);
 
-    tft.setCursor((TFT_CENTER_X-70), TFT_CENTER_Y-30);
+    tft.setCursor((TFT_CENTER_X - 70), TFT_CENTER_Y - 30);
     tft.println("INITIALIZING");
     tft.println("");
     tft.println("");
@@ -34,14 +33,13 @@ void DrawController::loading_screen()
     tft.println("               LONG PRESS RIGHT TO CANCEL");
 }
 
-void DrawController::setup_finished_screen()
-{
+void DrawController::setup_finished_screen() {
     tft.fillScreen(BACKGROUND_COLOR); // Wipe whole screen
     tft.setTextSize(2);
     tft.setTextColor(ST77XX_WHITE);
     tft.setTextWrap(true);
 
-    tft.setCursor((0), TFT_CENTER_Y-30);
+    tft.setCursor((0), TFT_CENTER_Y - 30);
     tft.println("          SETUP FINISHED");
     tft.println("      OTA MODE ENABLED");
     tft.println("");
@@ -122,7 +120,7 @@ void DrawMap::updateRingsRadiusText(int range_close, int range_medium) {
 
 // Update the compass direction and draw the compass
 void DrawMap::updateCompass(float angle) {
-    //angle = 360 + (90 - angle); // TEMP: convert angle from compass angle (0 degrees = north) to unit circle angle (0 degrees = E)
+    // angle = 360 + (90 - angle); // TEMP: convert angle from compass angle (0 degrees = north) to unit circle angle (0 degrees = E)
 
     int x_offset{};
     int y_offset{}; // The resulting offsets from the center point
@@ -253,7 +251,7 @@ void DrawMap::drawCoordinates() {
 
                 // Draw screen coordinates on the screen if they're within the bounds of the screen
                 if (screen_coords.x != -1 && screen_coords.y != -1) {
-                    if ((screen_coords.x <= TFT_X + BORDER_TOLERANCE) && (screen_coords.x >= 0 - BORDER_TOLERANCE)) {
+                    if ((screen_coords.x <= TFT_X + BORDER_TOLERANCE) && (screen_coords.x >= 0 - BORDER_TOLERANCE)) { // if the screen coordinates exist
                         if ((screen_coords.y <= TFT_Y + BORDER_TOLERANCE) && (screen_coords.y >= 0 - BORDER_TOLERANCE)) {
                             // Print location dot
                             tft.fillCircle(screen_coords.x, screen_coords.y, LOCATION_DOT_SIZE, ST77XX_GREEN);
@@ -273,7 +271,7 @@ void DrawMap::drawCoordinates() {
                             }
                         }
                     }
-                } // if the screen coordinates exist
+                }
             }
         }
     }

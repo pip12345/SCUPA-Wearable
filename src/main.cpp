@@ -6,8 +6,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-// #define DEBUG_MODE // Uncomment for debug mode, disables GPB receive wait and compass init
-// #define INCLUDE_OTA     // Uncomment to compile with over-the-air uploading
+//#define INCLUDE_OTA // Uncomment to compile with over-the-air uploading
 #define SENSORS_ENABLED // comment to disable sensors
 
 #ifdef INCLUDE_OTA
@@ -89,9 +88,9 @@ void setup() {
 
 #ifdef INCLUDE_OTA
     //////////////// OTA Server setup /////////////////////
-    WiFi.setTxPower(WIFI_POWER_MINUS_1dBm); // Low power wifi mode (doesnt work because esp-arduino sucks)
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, password);
+    WiFi.setTxPower(WIFI_POWER_MINUS_1dBm); // Low power mode (for some reason this doesnt work because esp drivers suck)
     Serial.print("AP started: ");
     Serial.println(ssid);
     Serial.print("IP address: ");
@@ -104,6 +103,8 @@ void setup() {
     AsyncElegantOTA.begin(&server); // Start ElegantOTA
     server.begin();
     Serial.println("HTTP server started");
+    Serial.print("WiFi power: ");
+    Serial.println(WiFi.getTxPower());
 /////////^ DO NOT TOUCH OR YOU BREAK OTA ^///////////////
 #endif
 
@@ -132,11 +133,12 @@ void setup() {
     // Initialization fails here if compass isn't connected
     Serial.println("Initializing compass");
     sensors.initCompass();
+    Serial.println("Compass initialized");
     Serial.println("Initializing depth sensor");
     sensors.initDepth();
+    Serial.println("Depth sensor initialized");
 #endif
-#ifndef DEBUG_MODE
-    Serial.println("Compass initialized");
+
     screen.loading_screen();
 
     // RUN GPS ONCE FOR STARTING LOCATION
@@ -150,7 +152,6 @@ void setup() {
         }
     }
     Serial.println("Buoy coordinate received.");
-#endif
 
     // Set this location as the starting location and save it
     gps_storage.addBookmark(gps_storage.returnUser().latitude, gps_storage.returnUser().longitude, gps_storage.returnUser().depth, "[Start Location]", 1);
@@ -240,7 +241,6 @@ void loop() {
         }
 
         if (btn_right_pressed) {
-            // msg_storage.addEmergencyNext("EMERGENCY - VERY IMPORTANT EMERGENCY MESSAGE OH MY GOD"); // debug
         }
 
         break;
