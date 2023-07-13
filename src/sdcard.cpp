@@ -19,8 +19,6 @@ void SdCardController::writeGpsArrayToSD(GpsCoordinates *arr) {
         sd_init_failed = false;
     }
 
-    /// CODE INBETWEEN HERE
-
     File file = SD.open("/gps_storage.txt", FILE_WRITE);
     if (!file) {
         sd_init_failed = true;
@@ -64,8 +62,6 @@ void SdCardController::readGpsArrayFromSD(GpsCoordinates *arr) {
         sd_init_failed = false;
     }
 
-    ///// CODE INBETWEEN HERE /////
-
     File file = SD.open("/gps_storage.txt", FILE_READ);
     if (!file) {
         sd_init_failed = true;
@@ -84,8 +80,6 @@ void SdCardController::readGpsArrayFromSD(GpsCoordinates *arr) {
 
         file.close();
     }
-
-    ///// END CODE /////
 
     SD.end();
     screen.init(); // i hate this
@@ -126,8 +120,6 @@ void SdCardController::readGpsDescriptionsFromSD(String *descriptions) {
         file.close();
     }
 
-    ///// END CODE /////
-
     SD.end();
     screen.init(); // i hate this
 }
@@ -149,8 +141,6 @@ void SdCardController::readMsgDescriptionsFromSD(String *message_descriptions) {
         sd_init_failed = false;
     }
 
-    ///// CODE INBETWEEN HERE /////
-
     File file = SD.open("/message_descriptions.txt", FILE_READ);
     if (!file) {
         sd_init_failed = true;
@@ -166,8 +156,6 @@ void SdCardController::readMsgDescriptionsFromSD(String *message_descriptions) {
 
         file.close();
     }
-
-    ///// END CODE /////
 
     SD.end();
     screen.init(); // i hate this
@@ -190,8 +178,6 @@ void SdCardController::readMsgEmergencyDescriptionsFromSD(String *emergency_desc
         sd_init_failed = false;
     }
 
-    ///// CODE INBETWEEN HERE /////
-
     File file = SD.open("/emergency_message_descriptions.txt", FILE_READ);
     if (!file) {
         sd_init_failed = true;
@@ -207,8 +193,6 @@ void SdCardController::readMsgEmergencyDescriptionsFromSD(String *emergency_desc
 
         file.close();
     }
-
-    ///// END CODE /////
 
     SD.end();
     screen.init(); // i hate this

@@ -4,8 +4,6 @@
 #include "MechaQMC5883.h"
 #include "MS5837.h"
 
-
-
 class Sensors {
   public:
     void initCompass();
@@ -17,7 +15,7 @@ class Sensors {
     void loopDepth();
     void loopCompass();
 
-    float depth{-1};           // Last measured depth
+    float depth{-1};       // Last measured depth
     int compass_azimuth{}; // Last measured compass azimuth
 
     MechaQMC5883 compass;

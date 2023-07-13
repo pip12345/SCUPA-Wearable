@@ -32,8 +32,6 @@ struct MessageEntry {
 // Starts at slot 0
 class MessageStorage {
   public:
-    MessageStorage();
-
     void addEntryNext(String text);
     void addEmergencyNext(String text);
 
@@ -50,8 +48,6 @@ class MessageStorage {
     bool returnAnyUnread();
 
     void reorganize(); // Reorganize all messages to remove blank spaces
-
-    // void debugPrintContents(); // print contents of entire array;
 
     String message_descriptions[MESSAGE_DESCRIPTION_SLOTS]{};     // Holds preprogrammed descriptions for sending messages
     String emergency_descriptions[EMERGENCY_DESCRIPTION_SLOTS]{}; // Holds preprogrammed descriptions for sending emergency messages

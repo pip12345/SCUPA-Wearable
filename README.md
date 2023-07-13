@@ -35,11 +35,11 @@
 ## About The Project
 
 Wearable device code for project SCUPA 2023.
-Runs on ESP32 with platformIO.
+Runs on ESP32 with PlatformIO.
 
-## To do:
-* Implement reading the depth sensor (sensors.cpp)
-* Keeping track of followed path
+## Setup
+The project is fully self contained and can be opened as-is inside PlatformIO.
+All library dependencies are included locally within the project.
 
 <!-- Dependencies -->
 ## Dependencies

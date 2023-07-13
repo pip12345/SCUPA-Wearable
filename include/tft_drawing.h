@@ -80,9 +80,6 @@ class DrawController {
 
     void loading_screen();
     void setup_finished_screen();
-
-    void clearAll();
-    void resetTextToDefault();
 };
 
 class DrawMap {
@@ -170,7 +167,7 @@ class DrawBookmarks {
     int selected_description{}; // Currently selected description item in the add new bookmark menu
     int current_page{};         // current page of MAX_MENU_ITEMS bookmarks being displayed on the menu, first page = 0
 
-    // State machine within loopBookmarks() handles subwindows
+    // State machine within loopX() handles subwindows
     int current_time{}; // Used for refreshing the loop
     int previous_time{};
     const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
@@ -232,8 +229,6 @@ class DrawSendMessage {
     int previous_time{};
     const int LOOP_UPDATE_INTERVAL = 2000; // update interval in ms
 };
-
-//// TO IMPLEMENT BELOW ////
 
 class DrawSendEmergency {
   public:

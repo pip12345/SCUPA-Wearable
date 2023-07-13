@@ -35,7 +35,7 @@ AsyncWebServer server(80);
 #define LEFT_PIN 35  // Left lower
 #define RIGHT_PIN 39 // Left upper
 
-#define SEND_USER_LOCATION_INTERVAL 10000 // Send user location every 30 seconds 30000
+#define SEND_USER_LOCATION_INTERVAL 30000 // Send user location every 30 seconds 30000
 
 DrawController screen;
 DrawMap gps_map;
@@ -90,7 +90,7 @@ void setup() {
     //////////////// OTA Server setup /////////////////////
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, password);
-    WiFi.setTxPower(WIFI_POWER_MINUS_1dBm); // Low power mode (for some reason this doesnt work because esp drivers suck)
+    WiFi.setTxPower(WIFI_POWER_MINUS_1dBm); // Low power mode (for some reason this doesnt work because esp-idf sucks)
     Serial.print("AP started: ");
     Serial.println(ssid);
     Serial.print("IP address: ");
@@ -379,7 +379,7 @@ void loop() {
                 // If long pressed again while in the warning popup state, delete the message
             } else if (messages_check.current_sub_state == messages_check.Substate::warning_popup) {
                 msg_storage.deleteEntry(messages_check.returnSelectedItem());     // Delete message if in the popup state
-                msg_storage.reorganize();                                         // Reorganize list to avoid empty spot in the middle
+                msg_storage.reorganize();                                         // Reorganize list to avoid empty spots in the middle
                 messages_check.current_sub_state = messages_check.Substate::list; // Return to list state
                 messages_check.updateCheckMessages();                             // Force update to make popup disappear instantly
             }

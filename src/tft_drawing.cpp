@@ -5,7 +5,7 @@ extern MessageStorage msg_storage;     // Requires msg_storage to be declared in
 extern SdCardController sd_controller; // Requires sd_controller to be declared in main
 
 // Inits tft in this cpp file on creation of the drawcontroller, use this for all global stuff
-// tft commands such as tft.drawPixel ONLY WORK inside this .cpp file
+// tft commands such as tft.drawPixel ONLY WORK inside this .cpp file (god knows why)
 DrawController::DrawController() {
     init();
     tft.fillScreen(BACKGROUND_COLOR); // Wipe whole screen
@@ -47,19 +47,8 @@ void DrawController::setup_finished_screen() {
     tft.setTextSize(1);
 }
 
-// Clear all elements from screen
-void DrawController::clearAll() {
-    tft.fillScreen(BACKGROUND_COLOR);
-}
-
-void DrawController::resetTextToDefault() {
-    tft.setTextSize(1);
-    tft.setTextColor(ST77XX_WHITE);
-    tft.setTextWrap(true);
-}
-
-// constructor
 DrawMap::DrawMap() {
+    // Default starting values
     pixels_per_meter = 0.4;
     compass_angle = 0;
 }
@@ -120,8 +109,6 @@ void DrawMap::updateRingsRadiusText(int range_close, int range_medium) {
 
 // Update the compass direction and draw the compass
 void DrawMap::updateCompass(float angle) {
-    // angle = 360 + (90 - angle); // TEMP: convert angle from compass angle (0 degrees = north) to unit circle angle (0 degrees = E)
-
     int x_offset{};
     int y_offset{}; // The resulting offsets from the center point
 
@@ -429,7 +416,6 @@ void DrawBookmarks::updateWarningPopUp() {
     // Don't clear screen on purpose, we want to still see what is in the background
 
     // Draw textbox in the center of the screen
-    // Hardcoded because I'm lazy
     tft.fillRoundRect(POPUP_SIZE, POPUP_SIZE, TFT_X - 2 * POPUP_SIZE, TFT_Y - 2 * POPUP_SIZE, 10, ST77XX_RED);
     tft.setTextWrap(true);
     tft.setTextSize(2);
@@ -452,7 +438,6 @@ void DrawBookmarks::updateInfoPanel() {
     // Don't clear screen on purpose, we want to still see what is in the background
 
     // Draw textbox in the center of the screen
-    // Hardcoded because I'm lazy
     tft.fillRoundRect(INFO_SIZE, INFO_SIZE, TFT_X - 2 * INFO_SIZE, TFT_Y - 2 * INFO_SIZE, 10, ST77XX_ORANGE);
     tft.setTextWrap(true);
     tft.setTextSize(1);
@@ -493,8 +478,6 @@ void DrawBookmarks::updateInfoPanel() {
     tft.print("Press LEFT to close");
 
     tft.setTextColor(ST77XX_WHITE);
-    // tft.print("Description: ");
-    // tft.print(gps_storage.returnBookmark(selected_item).description);
 }
 
 // Draw menu to add bookmark to currently selected_item
@@ -514,17 +497,15 @@ void DrawBookmarks::updateAddNewBookmarkMenu() {
     tft.print("-=-=- New Bookmark: Select a description -=-=-");
     tft.setTextColor(ST77XX_WHITE);
 
-    tft.setTextSize(2); // 12*16
+    tft.setTextSize(2); // 12*16 pixels per character
 
     for (int i = 0; i <= MAX_MENU_ITEMS; i++) {
         // Draw the preprogrammed strings
         tft.setCursor(12, 20 + (MENU_SPACING * i));
         tft.print(gps_storage.descriptions[i]);
-        // tft.print(" - ");
-        // tft.println(gps_storage.returnBookmark(i).description);
     }
 
-    tft.setTextSize(1); // 12*16
+    tft.setTextSize(1); // 12*16 pixels per character
 }
 
 // Bookmark current position to the selected_item chosen in addNewBookmarkMenu() using selected_description
@@ -550,7 +531,7 @@ void DrawBookmarks::upMenu() {
             We do that because there are MAX_MENU_ITEMS unique elements per page since the last
             element always gets redrawn at the top of the next page. */
 
-            current_page = (float)(int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use datatype rounding down trick
+            current_page = (float)(int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use casting rounding down trick
 
             updateBookmarks();
         }
@@ -576,7 +557,7 @@ void DrawBookmarks::downMenu() {
             We do that because there are MAX_MENU_ITEMS unique elements per page since the last
             element always gets redrawn at the top of the next page. */
 
-            current_page = (int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use datatype rounding down trick
+            current_page = (int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use casting rounding down trick
 
             updateBookmarks();
         }
@@ -592,7 +573,8 @@ void DrawCheckMessages::loopCheckMessages() {
     if (current_time - previous_time >= LOOP_UPDATE_INTERVAL) {
         previous_time = current_time;
 
-        // State machine for handling different subwindows within the bookmarks menu
+        // State machine for handling different subwindows
+        // These are called in main.cpp directly so there's no 2 second refresh loop delay
         switch (current_sub_state) {
         case list:
             updateCheckMessages();
@@ -659,7 +641,6 @@ void DrawCheckMessages::updateWarningPopUp() {
     // Don't clear screen on purpose, we want to still see what is in the background
 
     // Draw textbox in the center of the screen
-    // Hardcoded because I'm lazy
     tft.fillRoundRect(POPUP_SIZE, POPUP_SIZE, TFT_X - 2 * POPUP_SIZE, TFT_Y - 2 * POPUP_SIZE, 10, ST77XX_RED);
     tft.setTextWrap(true);
     tft.setTextSize(2);
@@ -707,7 +688,7 @@ void DrawCheckMessages::upMenu() {
         We do that because there are MAX_MENU_ITEMS unique elements per page since the last
         element always gets redrawn at the top of the next page. */
 
-        current_page = (float)(int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use datatype rounding down trick
+        current_page = (float)(int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use casting rounding down trick
 
         updateCheckMessages();
     }
@@ -722,7 +703,7 @@ void DrawCheckMessages::downMenu() {
         We do that because there are MAX_MENU_ITEMS unique elements per page since the last
         element always gets redrawn at the top of the next page. */
 
-        current_page = (int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use datatype rounding down trick
+        current_page = (int)(selected_item + 0.5) / MAX_MENU_ITEMS; // use casting rounding down trick
 
         updateCheckMessages();
     }

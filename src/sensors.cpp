@@ -12,7 +12,7 @@ void Sensors::readCompass() {
 
         compass.read(&x, &y, &z);
         compass_azimuth = compass.azimuth(&y, &x);
-        compass_azimuth += 90; // Compass is 90 degrees offset on the PCB
+        compass_azimuth += 90; // Compass is 90 degrees offset on the v2 PCB
     } else {
         // Debug program that rotates the compass in circles when there's no compass connected
         compass_azimuth += 10;

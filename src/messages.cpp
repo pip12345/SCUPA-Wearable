@@ -22,35 +22,6 @@ MessageEntry::MessageEntry(Message msg) {
     this->msg = msg;
 }
 
-MessageStorage::MessageStorage() {
-    // Message descriptions, preprogrammed for now.
-    // message_descriptions[0] = "Ok.";
-    // message_descriptions[1] = "Yes.";
-    // message_descriptions[2] = "No.";
-    // message_descriptions[3] = "Not sure.";
-    // message_descriptions[4] = "Maybe.";
-    // message_descriptions[5] = "Check this out.";
-    // message_descriptions[6] = "Come here.";
-    // message_descriptions[7] = "Closer.";
-    // message_descriptions[8] = "Farther.";
-    // message_descriptions[9] = "Returning soon.";
-    // message_descriptions[10] = "Surfaced.";
-    // message_descriptions[11] = "Underwater.";
-
-    // emergency_descriptions[0] = "Help!";
-    // emergency_descriptions[1] = "Partner in trouble!";
-    // emergency_descriptions[2] = "Not feeling well!";
-    // emergency_descriptions[3] = "Stuck!";
-    // emergency_descriptions[4] = "Oxygen low!";
-    // emergency_descriptions[5] = "Lost!";
-    // emergency_descriptions[6] = "Hurt!";
-    // emergency_descriptions[7] = "Equipment problems!";
-    // emergency_descriptions[8] = "Dangerous animal!";
-    // emergency_descriptions[9] = "Where are you?";
-    // emergency_descriptions[10] = "Cold!";
-    // emergency_descriptions[11] = "Sea horses in danger!";
-}
-
 // Add entry to the storage at the given slot
 void MessageStorage::addEntry(Message msg, int slot) {
     if (slot < MESSAGE_STORAGE_SLOTS && slot >= 0) {
@@ -159,28 +130,6 @@ void MessageStorage::deleteAll() {
         deleteEntry(i);
     }
 }
-
-// void MessageStorage::debugPrintContents() {
-//     for (int i = 0; i < MESSAGE_STORAGE_SLOTS; i++) {
-//         Serial.print("---------------- entry ");
-//         Serial.print(i);
-//         Serial.println(" ----------------");
-//         Serial.print("text: ");
-//         Serial.println(returnEntry(i).text);
-//         Serial.print("latitude: ");
-//         Serial.println(returnEntry(i).coords.latitude, 7);
-//         Serial.print("longitude: ");
-//         Serial.println(returnEntry(i).coords.longitude, 7);
-//         Serial.print("depth: ");
-//         Serial.println(returnEntry(i).coords.depth);
-//         Serial.print("gps description: ");
-//         Serial.println(returnEntry(i).coords.description);
-//         Serial.print("emergency: ");
-//         Serial.println(returnEntry(i).emergency);
-//         Serial.print("empty: ");
-//         Serial.println(returnIfEmpty(i));
-//     }
-// }
 
 // Return contents of the given slot
 Message MessageStorage::returnEntry(int slot) {

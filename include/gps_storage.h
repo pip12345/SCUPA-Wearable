@@ -24,7 +24,6 @@ struct GpsCoordinates {
 // Stores GPS coordinates in an array with a specific id, id 0 is reserved for the user itself. Bookmark ids go from 1 to GPS_STORAGE_SLOTS (default 64)
 class GpsStorage {
   public:
-    GpsStorage();
     void addBookmark(GpsCoordinates location, int slot); // bookmark location to slot 1 to GPS_STORAGE_SLOTS (default 64)
     void addBookmark(double latitude, double longitude, float depth, String description, int slot);
     void addBookmark(double latitude, double longitude, float depth, int slot);

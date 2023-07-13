@@ -5,8 +5,8 @@
 #include "sensors.h"
 #include <Arduino.h>
 
-#define baud 230400 //115200
-#define RTS_PIN 16 // 32 other proto
+#define baud 230400 // Minimum baud rate for data over power
+#define RTS_PIN 16 // 32 on proto
 
 // Handles receiving and sending of serial messages to buoy
 

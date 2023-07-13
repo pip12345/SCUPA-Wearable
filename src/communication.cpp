@@ -73,12 +73,11 @@ void CommHandler::sendBookmarkGPS(int slot) {
     // |"GPS"|LATITUDE|LONGITUDE|DEPTH|TEXT DESCRIPTION|
     String send_str = "|GPS|" + latitude + "|" + longitude + "|" + depth + "|" + bookmark.description + "|";
 
-    digitalWrite(RTS_PIN, HIGH);
+    digitalWrite(RTS_PIN, HIGH); // Ready to send enable, we have control over the data line now
     delayMicroseconds(8); // Length of 1 byte
     Serial.println(send_str);
-    // delayMicroseconds(2300); // Length of 256 bytes
-    delay(4);
-    digitalWrite(RTS_PIN, LOW);
+    delay(4); // Transmission delay grace period
+    digitalWrite(RTS_PIN, LOW); // Transmission completed, release line.
 }
 
 void CommHandler::sendUserGPS() {
@@ -95,8 +94,7 @@ void CommHandler::sendUserGPS() {
     digitalWrite(RTS_PIN, HIGH);
     delayMicroseconds(8);
     Serial.println(send_str);
-    // delayMicroseconds(2300);
-    delay(4);
+    delay(4); // Transmission delay grace period
     digitalWrite(RTS_PIN, LOW);
 }
 
@@ -106,8 +104,7 @@ void CommHandler::sendMSG(String msg) {
     digitalWrite(RTS_PIN, HIGH);
     delayMicroseconds(8);
     Serial.println(send_str);
-    // delayMicroseconds(2300);
-    delay(4);
+    delay(4); // Transmission delay grace period
     digitalWrite(RTS_PIN, LOW);
 }
 
@@ -117,7 +114,6 @@ void CommHandler::sendEMR(String emr_msg) {
     digitalWrite(RTS_PIN, HIGH);
     delayMicroseconds(8);
     Serial.println(send_str);
-    // delayMicroseconds(4600);
-    delay(4);
+    delay(4); // Transmission delay grace period
     digitalWrite(RTS_PIN, LOW);
 }
